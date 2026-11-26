@@ -26,8 +26,28 @@
     <aside class="sidebar" id="sidebar">
 
         <div class="brand">
-            <h2>SEVA</h2>
-            <p class="sidebar-subtitle">Seismic Monitoring System</p>
+
+            <!-- HAMBURGER / SIDEBAR TOGGLE -->
+            <button
+                type="button"
+                id="menuToggle"
+                class="menu-toggle"
+                aria-label="Collapse navigation menu"
+                aria-expanded="true"
+                aria-controls="sidebar">
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </button>
+
+            <!-- SEVA BRAND -->
+            <div class="brand-text">
+                <h2>SEVA</h2>
+                <p class="sidebar-subtitle">Seismic Monitoring System</p>
+            </div>
+
         </div>
 
         <nav aria-label="Main navigation">
@@ -75,20 +95,6 @@
     <!-- MAIN CONTENT -->
     <main class="main-content">
 
-        <button
-        type="button"
-        id="menuToggle"
-        class="menu-toggle"
-        aria-label="Open navigation menu"
-        aria-expanded="true"
-        aria-controls="sidebar">
-
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-
-
         <!-- =====================================
              DASHBOARD - FIRST INTERFACE
         ====================================== -->
@@ -115,7 +121,7 @@
 
 
             <!-- =================================
-                 Seismic Monitoring Overview
+                 SEISMIC MONITORING OVERVIEW
             ================================== -->
 
             <section id="overview" class="dashboard-section">
@@ -133,7 +139,6 @@
 
                 </div>
 
-
                 <div class="cards summary-cards">
 
                     <article class="card">
@@ -142,20 +147,17 @@
                         <small>Recorded seismic events</small>
                     </article>
 
-
                     <article class="card warning-card">
                         <p>Active Alerts</p>
                         <h3 id="activeAlerts">0</h3>
                         <small>Elevated or breached status</small>
                     </article>
 
-
                     <article class="card danger-card">
                         <p>Affected Buildings</p>
                         <h3 id="affectedBuildings">0</h3>
                         <small>Buildings requiring attention</small>
                     </article>
-
 
                     <article class="card">
                         <p>Monitored Buildings</p>
@@ -209,6 +211,7 @@
                 </section>
 
 
+                <!-- ACTIVITY GRAPH -->
                 <section id="analytics" class="dashboard-section">
 
                     <div class="section-heading">
@@ -347,7 +350,6 @@
 
                     <article class="card status-card">
                         <p>Online Sensors</p>
-
                         <h3 id="onlineSensors">0</h3>
 
                         <small>
@@ -356,10 +358,8 @@
                         </small>
                     </article>
 
-
                     <article class="card danger-card status-card">
                         <p>Offline Sensors</p>
-
                         <h3 id="offlineSensors">0</h3>
 
                         <small>
@@ -368,17 +368,13 @@
                         </small>
                     </article>
 
-
                     <article class="card status-card last-transmission-card">
                         <p>Last Transmission</p>
-
                         <h3 id="lastTransmission">Waiting...</h3>
-
                         <small>Most recent data update</small>
                     </article>
 
                 </div>
-
 
                 <!-- CURRENT SYSTEM ALERT -->
                 <div class="current-alert">
@@ -408,6 +404,7 @@
         <div id="activityMonitoringView" class="page-view hidden">
 
             <header class="topbar">
+
                 <div>
                     <p class="eyebrow">SEVA / MONITORING</p>
 
@@ -418,6 +415,7 @@
                         in Barangay BF Homes, Parañaque City.
                     </p>
                 </div>
+
             </header>
 
             <div class="dashboard-grid">
@@ -669,7 +667,6 @@
 
                     </div>
 
-
                     <div class="filter-control">
 
                         <label for="historyFilter">
@@ -678,15 +675,25 @@
 
                         <select id="historyFilter">
 
-                            <option value="all">All Fields</option>
+                            <option value="all">
+                                All Fields
+                            </option>
 
-                            <option value="date">Date</option>
+                            <option value="date">
+                                Date
+                            </option>
 
-                            <option value="building">Building Name</option>
+                            <option value="building">
+                                Building Name
+                            </option>
 
-                            <option value="street">Street / Location</option>
+                            <option value="street">
+                                Street / Location
+                            </option>
 
-                            <option value="time">Time</option>
+                            <option value="time">
+                                Time
+                            </option>
 
                         </select>
 
@@ -694,11 +701,9 @@
 
                 </div>
 
-
                 <p id="filterResultCount" class="filter-result-count">
                     Showing all records.
                 </p>
-
 
                 <!-- HISTORY TABLE -->
                 <div class="table-container">
@@ -729,7 +734,6 @@
                     </table>
 
                 </div>
-
 
                 <!-- IMPORT AND EXPORT -->
                 <div class="action-buttons">
@@ -774,7 +778,6 @@
 
             </header>
 
-
             <section class="dashboard-section report-panel">
 
                 <h2>Generate Monitoring Report</h2>
@@ -783,7 +786,6 @@
                     Generate a printable report containing building information
                     and recorded seismic activity.
                 </p>
-
 
                 <div class="report-details">
 
@@ -798,7 +800,6 @@
 
                 </div>
 
-
                 <button type="button" onclick="window.print()">
                     Print / Save Report as PDF
                 </button>
@@ -812,7 +813,6 @@
         <footer>
             SEVA Monitoring System | 2026
         </footer>
-
 
     </main>
 

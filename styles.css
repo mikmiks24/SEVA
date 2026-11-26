@@ -192,7 +192,6 @@ select:focus-visible {
     display: inline-flex;
     align-items: center;
     gap: 9px;
-
     flex-shrink: 0;
 
     background: var(--light-red);
@@ -223,9 +222,7 @@ section.dashboard-section {
     padding: 22px;
     margin-bottom: 22px;
     border-radius: 11px;
-
     box-shadow: 0 3px 12px rgba(89, 0, 0, 0.055);
-
     min-width: 0;
 }
 
@@ -260,7 +257,6 @@ section h2 {
     display: inline-flex;
     align-items: center;
     gap: 7px;
-
     color: var(--muted);
     font-size: 11px;
     white-space: nowrap;
@@ -287,15 +283,11 @@ section h2 {
 
 .card {
     background: var(--white);
-
     border: 1px solid #EEEEEE;
     border-left: 5px solid var(--primary);
-
     padding: 19px;
     border-radius: 9px;
-
     min-width: 0;
-
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.035);
 }
 
@@ -343,11 +335,9 @@ section h2 {
 
 .dashboard-grid {
     display: grid;
-
     grid-template-columns:
         minmax(0, 1.15fr)
         minmax(0, 1fr);
-
     gap: 20px;
     align-items: stretch;
 }
@@ -363,11 +353,8 @@ section h2 {
 #activityMap {
     height: 350px;
     width: 100%;
-
     border-radius: 9px;
-
     z-index: 1;
-
     background: #EEEEEE;
 }
 
@@ -375,9 +362,7 @@ section h2 {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
-
     margin-top: 12px;
-
     color: #666666;
     font-size: 11px;
 }
@@ -442,9 +427,7 @@ th,
 td {
     padding: 13px 14px;
     text-align: left;
-
     border-bottom: 1px solid var(--border);
-
     font-size: 12px;
     vertical-align: middle;
 }
@@ -477,13 +460,10 @@ tr:hover td {
 
 .status {
     display: inline-block;
-
     padding: 6px 10px;
     border-radius: 20px;
-
     font-size: 11px;
     font-weight: 700;
-
     white-space: nowrap;
 }
 
@@ -540,12 +520,9 @@ tr:hover td {
 
 .status-indicator {
     display: inline-block;
-
     width: 7px;
     height: 7px;
-
     border-radius: 50%;
-
     margin-right: 4px;
 }
 
@@ -575,7 +552,6 @@ tr:hover td {
 .alert {
     padding: 15px 17px;
     border-radius: 8px;
-
     font-size: 13px;
     font-weight: 700;
     line-height: 1.5;
@@ -605,9 +581,7 @@ tr:hover td {
     display: flex;
     align-items: flex-end;
     flex-wrap: wrap;
-
     gap: 12px;
-
     margin-top: 20px;
     margin-bottom: 10px;
 }
@@ -625,12 +599,9 @@ tr:hover td {
 .search-control label,
 .filter-control label {
     display: block;
-
     color: var(--secondary);
-
     font-size: 12px;
     font-weight: 700;
-
     margin-bottom: 7px;
 }
 
@@ -638,25 +609,18 @@ tr:hover td {
 #historyFilter {
     width: 100%;
     height: 42px;
-
     padding: 10px 12px;
-
     border: 1px solid #CCCCCC;
     border-radius: 6px;
-
     background: var(--white);
-
     color: var(--text);
-
     font-size: 13px;
-
     outline: none;
 }
 
 #searchHistory:focus,
 #historyFilter:focus {
     border-color: var(--primary);
-
     box-shadow: 0 0 0 3px rgba(128, 0, 0, 0.10);
 }
 
@@ -666,9 +630,7 @@ tr:hover td {
 
 .filter-result-count {
     margin: 8px 0 14px;
-
     color: var(--muted);
-
     font-size: 11px;
 }
 
@@ -682,7 +644,6 @@ tr:hover td {
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
-
     margin-top: 15px;
 }
 
@@ -707,12 +668,9 @@ tr:hover td {
 .report-details {
     background: #FAF5F5;
     border: 1px solid #F0E1E1;
-
     padding: 17px 20px;
     border-radius: 8px;
-
     margin: 17px 0;
-
     font-size: 13px;
     line-height: 1.8;
 }
@@ -730,11 +688,8 @@ tr:hover td {
 
 footer {
     text-align: center;
-
     color: #888888;
-
     padding: 22px 10px;
-
     font-size: 11px;
 }
 
@@ -789,10 +744,8 @@ footer {
 
     .sidebar {
         position: relative;
-
         width: 100%;
         height: auto;
-
         padding: 17px 15px;
     }
 
@@ -915,19 +868,44 @@ footer {
 
 }
 
+
 /* =====================================
-   HAMBURGER MENU
+   SIDEBAR HAMBURGER / COLLAPSE TOGGLE
 ===================================== */
 
-.menu-toggle {
-    position: fixed;
-    top: 20px;
-    left: 255px;
-    z-index: 1200;
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 36px;
+}
 
-    width: 42px;
-    height: 42px;
-    padding: 9px;
+.brand-text {
+    min-width: 0;
+}
+
+.brand h2 {
+    color: var(--white);
+    font-size: 31px;
+    letter-spacing: 1px;
+}
+
+.brand .sidebar-subtitle {
+    color: #E6CACA;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 3px;
+    margin-bottom: 0;
+}
+
+
+/* HAMBURGER BUTTON */
+
+.menu-toggle {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    padding: 8px;
 
     display: flex;
     flex-direction: column;
@@ -936,10 +914,9 @@ footer {
     gap: 5px;
 
     background: var(--primary);
-    border-radius: 7px;
+    border: none;
+    border-radius: 6px;
     cursor: pointer;
-
-    transition: left 0.3s ease, background 0.2s ease;
 }
 
 .menu-toggle:hover {
@@ -950,36 +927,42 @@ footer {
     display: block;
     width: 21px;
     height: 2px;
-    background: white;
+    background: #FFFFFF;
     border-radius: 3px;
 }
 
 
-/* SIDEBAR COLLAPSE - DESKTOP */
+/* =====================================
+   COLLAPSED DESKTOP SIDEBAR
+===================================== */
 
 .sidebar {
-    transition: transform 0.3s ease;
+    transition: width 0.3s ease, padding 0.3s ease;
 }
 
 .main-content {
     transition: margin-left 0.3s ease, width 0.3s ease;
 }
 
-.topbar {
-    padding-left: 50px;
+body.sidebar-collapsed .sidebar {
+    width: 70px;
+    padding: 25px 12px;
 }
 
-body.sidebar-collapsed .sidebar {
-    transform: translateX(-100%);
+body.sidebar-collapsed .brand {
+    justify-content: center;
+    margin-bottom: 28px;
+}
+
+body.sidebar-collapsed .brand-text,
+body.sidebar-collapsed .sidebar nav,
+body.sidebar-collapsed .sidebar-footer {
+    display: none;
 }
 
 body.sidebar-collapsed .main-content {
-    margin-left: 0;
-    width: 100%;
-}
-
-body.sidebar-collapsed .menu-toggle {
-    left: 18px;
+    margin-left: 70px;
+    width: calc(100% - 70px);
 }
 
 
@@ -989,54 +972,33 @@ body.sidebar-collapsed .menu-toggle {
 
 @media (max-width: 600px) {
 
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-
-        width: min(280px, 85vw);
-        height: 100vh;
-
-        z-index: 1000;
-
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-
-        overflow-y: auto;
+    .brand {
+        margin-bottom: 15px;
     }
 
-    body.sidebar-open .sidebar {
-        transform: translateX(0);
+    body.sidebar-collapsed .sidebar {
+        width: 100%;
+        height: auto;
+        padding: 17px 15px;
     }
 
-    body.sidebar-open::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-
-        background: rgba(0, 0, 0, 0.45);
-
-        z-index: 999;
+    body.sidebar-collapsed .brand {
+        justify-content: flex-start;
+        margin-bottom: 0;
     }
 
-    .menu-toggle {
-        top: 14px;
-        left: 16px;
+    body.sidebar-collapsed .brand-text {
+        display: block;
     }
 
-    .main-content {
+    body.sidebar-collapsed .sidebar nav,
+    body.sidebar-collapsed .sidebar-footer {
+        display: none;
+    }
+
+    body.sidebar-collapsed .main-content {
         margin-left: 0;
         width: 100%;
-        padding: 65px 16px 16px;
-    }
-
-    .topbar {
-        padding-left: 0;
-    }
-
-    .sidebar nav {
-        flex-direction: column;
-        gap: 7px;
     }
 
 }
