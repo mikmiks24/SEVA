@@ -503,87 +503,329 @@ function updateMapMarkers() {
 
 }
 
-
 /* =====================================
-   BUILDING MONITORING TABLE
+   BUILDING MONITORING: FILTERS, TABLE, CAPTURE TIME
 ===================================== */
 
-function updateBuildingTable() {
+const buildingFilters = { building: "all", search: "" };
 
-    const tables = [
+function getFilteredBuildings() {
 
-        document.getElementById("buildingTable"),
+    const search = buildingFilters.search.trim().toLowerCase();
 
-        document.getElementById("buildingTablePage")
+    return buildings.filter(building => {
 
-    ].filter(Boolean);
+        const buildingMatch =
+            buildingFilters.building === "all" ||
+            String(building.id) === buildingFilters.building;
 
+        const searchMatch =
+            search === "" ||
+            building.name.toLowerCase().includes(search) ||
+            building.location.toLowerCase().includes(search);
 
-    if (tables.length === 0) {
-
-        return;
-
-    }
-
-
-    tables.forEach(table => {
-
-        table.innerHTML = "";
-
-
-        buildings.forEach(building => {
-
-            const row = document.createElement("tr");
-
-
-            const displayedStatus =
-
-                building.status === "Breached"
-
-                    ? "Threshold Breached"
-
-                    : building.status;
-
-
-            row.innerHTML = `
-
-                <td>
-                    ${escapeHTML(building.name)}
-                </td>
-
-                <td>
-                    ${escapeHTML(building.location)}
-                </td>
-
-                <td>
-                    ${Number(building.pga).toFixed(3)} m/s²
-                </td>
-
-                <td>
-                    ${Number(building.tolerance).toFixed(2)} m/s²
-                </td>
-
-                <td>
-                    ${escapeHTML(building.magnitude)}
-                </td>
-
-                <td>
-                    <span class="status ${building.status}">
-                        ${displayedStatus}
-                    </span>
-                </td>
-
-            `;
-
-
-            table.appendChild(row);
-
-        });
+        return buildingMatch && searchMatch;
 
     });
 
 }
 
+function formatCapture(timestamp) {
+
+    if (!timestamp) {
+        return "Waiting...";
+    }
+
+    const date = new Date(timestamp);
+
+    return date.toLocaleDateString(undefined, {
+        month: "short", day: "numeric", year: "numeric"
+    }) + " · " + date.toLocaleTimeString();
+
+}
+
+function updateLastCapture() {
+
+    const element = document.getElementById("bmLastCapture");
+
+    if (!element) {
+        return;
+    }
+
+    const latest = Math.max(0, ...buildings.map(b => b.lastCapture || 0));
+
+    element.textContent = formatCapture(latest);
+
+}
+
+function updateBuildingTable() {
+
+    // Dashboard table (optional): always shows every building
+    const dashboardTable = document.getElementById("buildingTable");
+
+    if (dashboardTable) {
+
+        dashboardTable.innerHTML = buildings.map(building => `
+            <tr>
+                <td>${escapeHTML(building.name)}</td>
+                <td>${escapeHTML(building.location)}</td>
+                <td>${Number(building.pga).toFixed(3)} m/s²</td>
+                <td>${Number(building.tolerance).toFixed(2)} m/s²</td>
+                <td>${escapeHTML(building.magnitude)}</td>
+                <td>
+                    <span class="status ${building.status}">
+                        ${building.status === "Breached" ? "Threshold Breached" : building.status}
+                    </span>
+                </td>
+            </tr>
+        `).join("");
+
+    }
+
+
+    // Building Monitoring page
+    const pageTable = document.getElementById("buildingTablePage");
+
+    if (!pageTable) {
+        return;
+    }
+
+    const list = getFilteredBuildings();
+
+    if (list.length === 0) {
+
+        pageTable.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-state">
+                    No buildings match the selected filters.
+                </td>
+            </tr>
+        `;
+
+    } else {
+
+        pageTable.innerHTML = list.map(building => {
+
+            const percent = Math.min(
+                (building.pga / building.tolerance) * 100,
+                100
+            );
+
+            const displayedStatus = building.status === "Breached"
+                ? "Threshold Breached"
+                : building.status;
+
+            return `
+                <tr>
+                    <td><strong>${escapeHTML(building.name)}</strong></td>
+                    <td>${escapeHTML(building.location)}</td>
+                    <td class="pga-cell">
+                        ${Number(building.pga).toFixed(3)} m/s²
+                        <div class="pga-bar">
+                            <div class="pga-fill fill-${building.status}"
+                                 style="width:${percent.toFixed(0)}%"></div>
+                        </div>
+                    </td>
+                    <td>${Number(building.tolerance).toFixed(2)} m/s²</td>
+                    <td>${escapeHTML(building.magnitude)}</td>
+                    <td>
+                        <span class="status ${building.status}">
+                            ${displayedStatus}
+                        </span>
+                    </td>
+                    <td class="capture-cell">${formatCapture(building.lastCapture)}</td>
+                </tr>
+            `;
+
+        }).join("");
+
+    }
+
+
+    // Summary tiles and result count
+    const setText = (id, value) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+    };
+
+    setText("bmShown", list.length);
+    setText("bmNormal", list.filter(b => b.status === "Normal").length);
+    setText("bmElevated", list.filter(b => b.status === "Elevated").length);
+    setText("bmBreached", list.filter(b => b.status === "Breached").length);
+    setText("bmResultCount", `Showing ${list.length} of ${buildings.length} buildings.`);
+
+    updateLastCapture();
+
+}
+
+
+/* Search + dropdown (combobox) */
+
+function setupBuildingFilters() {
+
+    const combo  = document.getElementById("bmCombo");
+    const input  = document.getElementById("bmSearch");
+    const toggle = document.getElementById("bmToggle");
+    const list   = document.getElementById("bmList");
+
+    if (!combo || !input || !toggle || !list) {
+        return;
+    }
+
+    let activeIndex = -1;
+    let visibleItems = [];
+
+    function getItems() {
+
+        const query = buildingFilters.search.trim().toLowerCase();
+
+        const matches = buildings.filter(building =>
+            query === "" ||
+            building.name.toLowerCase().includes(query) ||
+            building.location.toLowerCase().includes(query)
+        );
+
+        const items = matches.map(building => ({
+            id: String(building.id),
+            name: building.name
+        }));
+
+        return query === ""
+            ? [{ id: "all", name: "All buildings" }, ...items]
+            : items;
+
+    }
+
+    function renderList() {
+
+        visibleItems = getItems();
+
+        if (visibleItems.length === 0) {
+            list.innerHTML =
+                '<li class="combo-empty">No matching buildings</li>';
+            return;
+        }
+
+        list.innerHTML = visibleItems.map((item, index) => {
+
+            const selected = item.id === buildingFilters.building;
+
+            return `
+                <li role="option"
+                    data-id="${item.id}"
+                    aria-selected="${selected}"
+                    class="${selected ? "selected" : ""} ${index === activeIndex ? "active" : ""}">
+                    ${escapeHTML(item.name)}
+                </li>
+            `;
+
+        }).join("");
+
+    }
+
+    function openList() {
+        combo.classList.add("open");
+        list.hidden = false;
+        input.setAttribute("aria-expanded", "true");
+        renderList();
+    }
+
+    function closeList() {
+        combo.classList.remove("open");
+        list.hidden = true;
+        input.setAttribute("aria-expanded", "false");
+        activeIndex = -1;
+    }
+
+    function choose(id) {
+
+        buildingFilters.building = id;
+        buildingFilters.search = "";
+
+        const selected = buildings.find(
+            building => String(building.id) === id
+        );
+
+        input.value = selected ? selected.name : "";
+
+        closeList();
+        updateBuildingTable();
+
+    }
+
+    // Typing searches and clears any selected building
+    input.addEventListener("input", () => {
+        buildingFilters.building = "all";
+        buildingFilters.search = input.value;
+        activeIndex = -1;
+        openList();
+        updateBuildingTable();
+    });
+
+    input.addEventListener("click", () => {
+        if (!combo.classList.contains("open")) {
+            openList();
+        }
+    });
+
+    toggle.addEventListener("click", () => {
+        if (combo.classList.contains("open")) {
+            closeList();
+        } else {
+            openList();
+            input.focus();
+        }
+    });
+
+    // Keep focus in the input while clicking an option
+    list.addEventListener("mousedown", event => event.preventDefault());
+
+    list.addEventListener("click", event => {
+        const option = event.target.closest("li[data-id]");
+        if (option) {
+            choose(option.dataset.id);
+        }
+    });
+
+    input.addEventListener("keydown", event => {
+
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+
+            event.preventDefault();
+
+            if (!combo.classList.contains("open")) {
+                openList();
+            }
+
+            const step = event.key === "ArrowDown" ? 1 : -1;
+
+            activeIndex =
+                (activeIndex + step + visibleItems.length) %
+                Math.max(visibleItems.length, 1);
+
+            renderList();
+
+        } else if (event.key === "Enter" && activeIndex >= 0) {
+
+            event.preventDefault();
+            choose(visibleItems[activeIndex].id);
+
+        } else if (event.key === "Escape") {
+
+            closeList();
+
+        }
+
+    });
+
+    // Close when clicking outside
+    document.addEventListener("click", event => {
+        if (!combo.contains(event.target)) {
+            closeList();
+        }
+    });
+
+}
 
 /* =====================================
    SUMMARY CARDS
@@ -1973,7 +2215,7 @@ function simulateSensorData() {
         building.pga = Math.random() * 2.4;
 
 
-        // Determine building status
+                // Determine building status
         building.status = determineStatus(
 
             building.pga,
@@ -1981,6 +2223,10 @@ function simulateSensorData() {
             building.tolerance
 
         );
+
+
+        // Record the capture time          <-- add these two lines
+        building.lastCapture = Date.now();
 
 
         // Add historical record
@@ -2053,6 +2299,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // CSV import
     setupCSVImport();
 
+    // Building search + dropdown 
+    setupBuildingFilters();  
 
     // Initialize Chart.js for Dashboard and Activity Monitoring
     initializeChart("seismicChart");

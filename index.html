@@ -483,70 +483,122 @@
         </div>
 
 
-        <!-- =====================================
-             BUILDING MONITORING PAGE
-        ====================================== -->
+            <!-- =====================================
+                BUILDING MONITORING PAGE
+            ====================================== -->
 
-        <div id="buildingMonitoringView" class="page-view hidden">
+<div id="buildingMonitoringView" class="page-view hidden">
 
-            <header class="topbar">
+    <header class="topbar">
 
-                <div>
-                    <p class="eyebrow">SEVA / BUILDINGS</p>
+        <div>
+            <p class="eyebrow">SEVA / BUILDINGS</p>
 
-                    <h1>Building Monitoring</h1>
+            <h1>Building Monitoring</h1>
 
-                    <p>Current seismic condition of registered buildings.</p>
+            <p>Current seismic condition of registered buildings.</p>
+        </div>
+
+    </header>
+
+    <section class="dashboard-section">
+
+        <h2>Registered Buildings</h2>
+
+        <p class="section-description">
+            Select a building from the list, or type to search by name or location.
+        </p>
+
+        <!-- Summary tiles -->
+        <div class="bm-summary">
+            <div class="bm-tile">
+                <span>Buildings Shown</span>
+                <strong id="bmShown">0</strong>
+            </div>
+            <div class="bm-tile normal">
+                <span>Normal</span>
+                <strong id="bmNormal">0</strong>
+            </div>
+            <div class="bm-tile elevated">
+                <span>Elevated</span>
+                <strong id="bmElevated">0</strong>
+            </div>
+            <div class="bm-tile breached">
+                <span>Breached</span>
+                <strong id="bmBreached">0</strong>
+            </div>
+        </div>
+
+        <!-- Search + dropdown (left) and latest capture (right) -->
+        <div class="bm-toolbar">
+
+            <div class="bm-field grow">
+                <label for="bmSearch">Building</label>
+
+                <div class="combo" id="bmCombo">
+
+                    <input type="text" id="bmSearch"
+                           role="combobox"
+                           aria-expanded="false"
+                           aria-controls="bmList"
+                           aria-autocomplete="list"
+                           placeholder="Search or select a building"
+                           autocomplete="off">
+
+                    <button type="button" class="combo-toggle" id="bmToggle"
+                            aria-label="Show buildings">
+                        <svg viewBox="0 0 12 8" width="12" height="8" aria-hidden="true">
+                            <path d="M1 1l5 5 5-5" fill="none" stroke="currentColor"
+                                  stroke-width="1.8" stroke-linecap="round"
+                                  stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+
+                    <ul class="combo-list" id="bmList" role="listbox" hidden></ul>
+
                 </div>
+            </div>
 
-            </header>
-
-            <section class="dashboard-section">
-
-                <div class="section-heading">
-                    <div>
-                        <h2>Building Monitoring Table</h2>
-                    </div>
-                </div>
-
-                <p class="section-description">
-                    Monitor the PGA readings, predefined building tolerance,
-                    location, and current condition of registered buildings.
-                </p>
-
-                <div class="table-container">
-
-                    <table>
-
-                        <thead>
-                            <tr>
-                                <th>Building</th>
-                                <th>Street / Location</th>
-                                <th>PGA</th>
-                                <th>Tolerance</th>
-                                <th>Magnitude</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-
-                        <tbody id="buildingTablePage">
-
-                            <tr>
-                                <td colspan="6" class="empty-state">
-                                    Loading building information...
-                                </td>
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </section>
+            <div class="bm-live">
+                <span class="live-dot"></span>
+                Latest capture: <strong id="bmLastCapture">Waiting...</strong>
+            </div>
 
         </div>
 
+        <p id="bmResultCount" class="filter-result-count"></p>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Building</th>
+                        <th>Street / Location</th>
+                        <th>PGA vs Tolerance</th>
+                        <th>Tolerance</th>
+                        <th>Magnitude</th>
+                        <th>Status</th>
+                        <th>Last Capture</th>
+                    </tr>
+                </thead>
+
+                <tbody id="buildingTablePage">
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            Loading building information...
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</div>
 
         <!-- =====================================
              SENSOR READINGS PAGE
