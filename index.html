@@ -50,9 +50,8 @@
                 Activity Graph
             </a>
 
-            <a href="#buildingMonitoring"
-                data-page="dashboardView"
-                data-scroll="buildingMonitoring">
+            <a href="#buildingView"
+                data-page="buildingView">
                 Building Monitoring
             </a>
 
@@ -244,59 +243,6 @@
 
 
             <!-- =================================
-                 BUILDING MONITORING
-            ================================== -->
-
-            <section id="buildingMonitoring" class="dashboard-section">
-
-                <div class="section-heading">
-
-                    <div>
-                        <h2>Building Monitoring</h2>
-                    </div>
-
-                </div>
-
-                <p class="section-description">
-                    Monitor the PGA readings, predefined building tolerance,
-                    location, and current condition of registered buildings.
-                </p>
-
-
-                <div class="table-container">
-
-                    <table>
-
-                        <thead>
-                            <tr>
-                                <th>Building</th>
-                                <th>Street / Location</th>
-                                <th>PGA</th>
-                                <th>Tolerance</th>
-                                <th>Magnitude</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-
-                        <tbody id="buildingTable">
-
-                            <tr>
-                                <td colspan="6" class="empty-state">
-                                    Loading building information...
-                                </td>
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- =================================
                 REAL-TIME SENSOR READINGS
             ================================== -->
 
@@ -446,7 +392,108 @@
 
         </div>
 
+        <!-- =====================================
+             BUILDING MONITORING PAGE
+        ====================================== -->
 
+        <div id="buildingView" class="page-view building-page hidden">
+
+            <header class="topbar">
+
+                <div>
+                    <p class="eyebrow">SEVA / BUILDINGS</p>
+
+                    <h1>Building Monitoring</h1>
+
+                    <p>Barangay BF Homes, Parañaque City</p>
+                </div>
+
+            </header>
+
+
+            <!-- SUMMARY CARDS -->
+            <section class="dashboard-section">
+
+                <div class="cards summary-cards">
+
+                    <article class="card">
+                        <p>Total Buildings</p>
+                        <h3 id="bmTotal">0</h3>
+                        <small>Registered buildings</small>
+                    </article>
+
+                    <article class="card">
+                        <p>Normal</p>
+                        <h3 id="bmNormal">0</h3>
+                        <small>Within safe range</small>
+                    </article>
+
+                    <article class="card warning-card">
+                        <p>Elevated</p>
+                        <h3 id="bmElevated">0</h3>
+                        <small>Approaching tolerance</small>
+                    </article>
+
+                    <article class="card danger-card">
+                        <p>Threshold Breached</p>
+                        <h3 id="bmBreached">0</h3>
+                        <small>Requires attention</small>
+                    </article>
+
+                </div>
+
+            </section>
+
+
+            <!-- BUILDING TABLE -->
+            <section id="buildingMonitoring" class="dashboard-section">
+
+                <div class="section-heading">
+
+                    <div>
+                        <h2>Registered Buildings</h2>
+                    </div>
+
+                </div>
+
+                <p class="section-description">
+                    Monitor the PGA readings, predefined building tolerance,
+                    location, and current condition of registered buildings.
+                </p>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Building</th>
+                                <th>Street / Location</th>
+                                <th>PGA</th>
+                                <th>Tolerance</th>
+                                <th>Magnitude</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="buildingTable">
+
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    Loading building information...
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </div>
 
         <!-- =====================================
              SEISMIC HISTORY PAGE

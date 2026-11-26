@@ -910,3 +910,77 @@ footer {
     }
 
 }
+
+/* =====================================
+   BUILDING MONITORING PAGE (LARGE VIEW)
+===================================== */
+
+.building-page .topbar h1 {
+    font-size: 34px;
+}
+
+.building-page .topbar p:not(.eyebrow) {
+    font-size: 16px;
+}
+
+.building-page section.dashboard-section {
+    padding: 32px;
+}
+
+.building-page section h2 {
+    font-size: 24px;
+}
+
+.building-page .section-description {
+    font-size: 15px;
+    margin-bottom: 22px;
+}
+
+.building-page .card {
+    padding: 26px;
+}
+
+.building-page .card p {
+    font-size: 15px;
+}
+
+.building-page .card h3 {
+    font-size: 42px;
+}
+
+.building-page .card small {
+    font-size: 13px;
+}
+
+.building-page table {
+    min-width: 900px;
+}
+
+.building-page th,
+.building-page td {
+    font-size: 16px;
+    padding: 22px 20px;
+}
+
+.building-page .status {
+    font-size: 14px;
+    padding: 9px 18px;
+}
+
+.building-page #buildingMonitoring {
+    min-height: 55vh;
+}
+
+@media (max-width: 900px) {
+
+    .building-page .card h3 {
+        font-size: 34px;
+    }
+
+    .building-page th,
+    .building-page td {
+        font-size: 14px;
+        padding: 16px 14px;
+    }
+
+}

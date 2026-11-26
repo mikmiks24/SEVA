@@ -497,12 +497,41 @@ function updateBuildingTable() {
         `;
 
 
-        table.appendChild(row);
+               table.appendChild(row);
 
     });
 
+    updateBuildingSummary();
+
 }
 
+/* =====================================
+   BUILDING MONITORING SUMMARY CARDS
+===================================== */
+
+function updateBuildingSummary() {
+
+    const count = status =>
+        buildings.filter(building => building.status === status).length;
+
+    const setValue = (id, value) => {
+
+        const element = document.getElementById(id);
+
+        if (element) {
+
+            element.textContent = value;
+
+        }
+
+    };
+
+    setValue("bmTotal", buildings.length);
+    setValue("bmNormal", count("Normal"));
+    setValue("bmElevated", count("Elevated"));
+    setValue("bmBreached", count("Breached"));
+
+}
 
 /* =====================================
    SUMMARY CARDS
