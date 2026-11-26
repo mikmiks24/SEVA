@@ -135,6 +135,48 @@ select:focus-visible {
     transition: background 0.2s ease;
 }
 
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 20px;
+    font-size: 20px;
+}
+
+/* Activity Monitoring Icon */
+.activity-icon {
+    font-size: 20px;
+    width: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Building Monitoring Icon */
+.building-icon {
+    font-size: 20px;
+    width: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Sensor Readings Icon */
+.sensor-icon {
+    font-size: 20px;
+    width: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .sidebar nav a:hover,
 .sidebar nav a.active {
     background: var(--primary);
