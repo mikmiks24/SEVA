@@ -1,24 +1,4 @@
 
-/* =====================================
-   SEVA DASHBOARD JAVASCRIPT
-   PUP-INSPIRED RED AND WHITE THEME
-
-   DEMONSTRATION VERSION
-
-   NOTE:
-   Sensor values are simulated.
-   Actual Raspberry Pi 4 and ADXL355
-   integration is not yet implemented.
-===================================== */
-
-
-/* =====================================
-   SAMPLE BUILDING DATA
-
-   Replace the sample information with
-   verified building records and addresses.
-===================================== */
-
 const buildings = [
 
     {
@@ -67,14 +47,14 @@ const buildings = [
 // Complete seismic history
 let historyRecords = [];
 
-// Leaflet map
-let map = null;
+// Leaflet maps (Dashboard and Activity Monitoring page)
+const maps = {};
 
-// Map markers
+// Map markers, grouped by map ID
 const mapMarkers = {};
 
-// Chart.js
-let seismicChart = null;
+// Chart.js instances (Dashboard and Activity Monitoring page)
+const seismicCharts = {};
 
 
 /* =====================================
@@ -86,13 +66,11 @@ function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, character => {
 
         const replacements = {
-
             "&": "&amp;",
             "<": "&lt;",
             ">": "&gt;",
             '"': "&quot;",
             "'": "&#39;"
-
         };
 
         return replacements[character];
@@ -110,9 +88,7 @@ function showPage(pageId) {
 
     // Hide all pages
     document.querySelectorAll(".page-view").forEach(page => {
-
         page.classList.add("hidden");
-
     });
 
 
@@ -120,11 +96,8 @@ function showPage(pageId) {
     const selectedPage = document.getElementById(pageId);
 
     if (!selectedPage) {
-
         console.warn("Page not found:", pageId);
-
         return;
-
     }
 
     selectedPage.classList.remove("hidden");
@@ -132,9 +105,7 @@ function showPage(pageId) {
 
     // Update active sidebar link
     document.querySelectorAll(".sidebar nav a").forEach(link => {
-
         link.classList.remove("active");
-
     });
 
 
@@ -143,18 +114,31 @@ function showPage(pageId) {
     );
 
     if (activeLink) {
-
         activeLink.classList.add("active");
-
     }
 
 
-    // Refresh map dimensions
-    if (pageId === "dashboardView" && map) {
+    // Refresh the map and graph after their page becomes visible.
+    const visibleMapId = {
+        dashboardView: "map",
+        activityMonitoringView: "activityMap"
+    }[pageId];
+
+    if (visibleMapId) {
 
         setTimeout(() => {
 
-            map.invalidateSize();
+            if (maps[visibleMapId]) {
+                maps[visibleMapId].invalidateSize();
+            }
+
+            const visibleChartId = pageId === "dashboardView"
+                ? "seismicChart"
+                : "activityChart";
+
+            if (seismicCharts[visibleChartId]) {
+                seismicCharts[visibleChartId].resize();
+            }
 
         }, 150);
 
@@ -162,11 +146,8 @@ function showPage(pageId) {
 
 
     window.scrollTo({
-
         top: 0,
-
         behavior: "smooth"
-
     });
 
 }
@@ -178,51 +159,16 @@ function showPage(pageId) {
 
 function setupNavigation() {
 
-    document.querySelectorAll(".sidebar nav a[data-page]")
+    
 
+    document.querySelectorAll(".sidebar nav a[data-page]")
         .forEach(link => {
 
             link.addEventListener("click", event => {
 
                 event.preventDefault();
 
-                const pageId = link.dataset.page;
-
-                const scrollTarget = link.dataset.scroll;
-
-
-                showPage(pageId);
-
-
-                // Scroll to selected dashboard section
-                if (scrollTarget && pageId === "dashboardView") {
-
-                    setTimeout(() => {
-
-                        const target = document.getElementById(scrollTarget);
-
-                        if (target) {
-
-                            target.scrollIntoView({
-
-                                behavior: "smooth",
-
-                                block: "start"
-
-                            });
-
-                        }
-
-
-                        if (scrollTarget === "mapSection" && map) {
-
-                            map.invalidateSize();
-
-                        }
-
-                    }, 180);
-
-                }
+                showPage(link.dataset.page);
 
             });
 
@@ -230,7 +176,128 @@ function setupNavigation() {
 
 }
 
+/* =====================================
+   HAMBURGER MENU FUNCTION
+===================================== */
 
+function setupMenuToggle() {
+
+    const menuToggle = document.getElementById("menuToggle");
+    const sidebar = document.getElementById("sidebar");
+
+    if (!menuToggle || !sidebar) {
+        return;
+    }
+
+    function updateButton() {
+
+        const isMobile = window.matchMedia(
+            "(max-width: 600px)"
+        ).matches;
+
+        const isOpen = isMobile
+            ? document.body.classList.contains("sidebar-open")
+            : !document.body.classList.contains("sidebar-collapsed");
+
+        menuToggle.setAttribute("aria-expanded", String(isOpen));
+
+        menuToggle.setAttribute(
+            "aria-label",
+            isOpen ? "Close navigation menu" : "Open navigation menu"
+        );
+
+    }
+
+
+    // Toggle sidebar when hamburger is clicked
+    menuToggle.addEventListener("click", function () {
+
+        if (window.matchMedia("(max-width: 600px)").matches) {
+
+            document.body.classList.toggle("sidebar-open");
+
+        } else {
+
+            document.body.classList.toggle("sidebar-collapsed");
+
+        }
+
+        updateButton();
+
+    });
+
+
+    // Close mobile menu after selecting a navigation item
+    sidebar.querySelectorAll("nav a").forEach(link => {
+
+        link.addEventListener("click", function () {
+
+            if (window.matchMedia("(max-width: 600px)").matches) {
+
+                document.body.classList.remove("sidebar-open");
+
+                updateButton();
+
+            }
+
+        });
+
+    });
+
+
+    // Close mobile menu when clicking outside the sidebar
+    document.addEventListener("click", function (event) {
+
+        if (
+            window.matchMedia("(max-width: 600px)").matches &&
+            document.body.classList.contains("sidebar-open") &&
+            !sidebar.contains(event.target) &&
+            !menuToggle.contains(event.target)
+        ) {
+
+            document.body.classList.remove("sidebar-open");
+
+            updateButton();
+
+        }
+
+    });
+
+
+    // Close menu using Escape key
+    document.addEventListener("keydown", function (event) {
+
+        if (event.key === "Escape") {
+
+            document.body.classList.remove("sidebar-open");
+
+            updateButton();
+
+        }
+
+    });
+
+
+    // Handle screen resizing
+    window.addEventListener("resize", function () {
+
+        if (window.innerWidth > 600) {
+
+            document.body.classList.remove("sidebar-open");
+
+        } else {
+
+            document.body.classList.remove("sidebar-collapsed");
+
+        }
+
+        updateButton();
+
+    });
+
+    updateButton();
+
+}
 /* =====================================
    STATUS CLASSIFICATION
 
@@ -244,18 +311,12 @@ function setupNavigation() {
 function determineStatus(pga, tolerance) {
 
     if (pga >= tolerance) {
-
         return "Breached";
-
     }
-
 
     if (pga >= tolerance * 0.60) {
-
         return "Elevated";
-
     }
-
 
     return "Normal";
 
@@ -266,51 +327,38 @@ function determineStatus(pga, tolerance) {
    LEAFLET MAP INITIALIZATION
 ===================================== */
 
-function initializeMap() {
+function initializeMap(mapId = "map") {
 
-    const mapElement = document.getElementById("map");
-
+    const mapElement = document.getElementById(mapId);
 
     if (!mapElement || typeof L === "undefined") {
-
-        console.error(
-            "Map initialization failed. Check Leaflet."
-        );
-
+        console.error("Map initialization failed for:", mapId, "Check Leaflet.");
         return;
-
     }
 
+    // Avoid initializing the same map more than once.
+    if (maps[mapId]) {
+        return;
+    }
 
     // BF Homes, Parañaque City
-    map = L.map("map").setView(
-
+    const mapInstance = L.map(mapId).setView(
         [14.44577, 121.02714],
-
         16
-
     );
 
-
-    // OpenStreetMap
     L.tileLayer(
-
         "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-
         {
-
             maxZoom: 19,
-
             attribution:
                 '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
-
-            referrerPolicy:
-                "strict-origin-when-cross-origin"
-
+            referrerPolicy: "strict-origin-when-cross-origin"
         }
+    ).addTo(mapInstance);
 
-    ).addTo(map);
-
+    maps[mapId] = mapInstance;
+    mapMarkers[mapId] = {};
 
     updateMapMarkers();
 
@@ -324,15 +372,11 @@ function initializeMap() {
 function getMarkerColor(status) {
 
     if (status === "Breached") {
-
         return "#DC3545";
-
     }
 
     if (status === "Elevated") {
-
         return "#E5A000";
-
     }
 
     return "#198754";
@@ -346,22 +390,16 @@ function getMarkerColor(status) {
 
 function updateMapMarkers() {
 
-    if (!map || typeof L === "undefined") {
-
+    if (Object.keys(maps).length === 0 || typeof L === "undefined") {
         return;
-
     }
-
 
     buildings.forEach(building => {
 
         const markerColor = getMarkerColor(building.status);
 
-
         const markerIcon = L.divIcon({
-
             className: "",
-
             html: `
                 <div style="
                     background: ${markerColor};
@@ -372,62 +410,42 @@ function updateMapMarkers() {
                     box-shadow: 0 1px 5px rgba(0,0,0,0.45);
                 "></div>
             `,
-
             iconSize: [18, 18],
-
             iconAnchor: [9, 9]
-
         });
 
-
         const popupContent = `
-
             <strong>${escapeHTML(building.name)}</strong><br>
-
             Location: ${escapeHTML(building.location)}<br>
-
             PGA: ${Number(building.pga).toFixed(3)} m/s²<br>
-
             Tolerance: ${Number(building.tolerance).toFixed(2)} m/s²<br>
-
             Status: ${escapeHTML(building.status)}
-
         `;
 
+        // Keep each map's markers independent while displaying the same data.
+        Object.entries(maps).forEach(([mapId, mapInstance]) => {
 
-        if (mapMarkers[building.id]) {
+            const markersForMap = mapMarkers[mapId];
 
-            mapMarkers[building.id]
+            if (markersForMap[building.id]) {
 
-                .setLatLng([
-                    building.latitude,
-                    building.longitude
-                ])
+                markersForMap[building.id]
+                    .setLatLng([building.latitude, building.longitude])
+                    .setIcon(markerIcon)
+                    .setPopupContent(popupContent);
 
-                .setIcon(markerIcon)
+            } else {
 
-                .setPopupContent(popupContent);
+                markersForMap[building.id] = L.marker(
+                    [building.latitude, building.longitude],
+                    { icon: markerIcon }
+                )
+                    .addTo(mapInstance)
+                    .bindPopup(popupContent);
 
-        } else {
+            }
 
-            mapMarkers[building.id] = L.marker(
-
-                [
-                    building.latitude,
-                    building.longitude
-                ],
-
-                {
-                    icon: markerIcon
-                }
-
-            )
-
-            .addTo(map)
-
-            .bindPopup(popupContent);
-
-        }
+        });
 
     });
 
@@ -440,98 +458,48 @@ function updateMapMarkers() {
 
 function updateBuildingTable() {
 
-    const table = document.getElementById("buildingTable");
+    const tables = [
+        document.getElementById("buildingTable"),
+        document.getElementById("buildingTablePage")
+    ].filter(Boolean);
 
-    if (!table) {
-
+    if (tables.length === 0) {
         return;
-
     }
 
+    tables.forEach(table => {
 
-    table.innerHTML = "";
+        table.innerHTML = "";
 
+        buildings.forEach(building => {
 
-    buildings.forEach(building => {
+            const row = document.createElement("tr");
 
-        const row = document.createElement("tr");
-
-
-        const displayedStatus =
-
-            building.status === "Breached"
-
+            const displayedStatus = building.status === "Breached"
                 ? "Threshold Breached"
-
                 : building.status;
 
+            row.innerHTML = `
+                <td>${escapeHTML(building.name)}</td>
+                <td>${escapeHTML(building.location)}</td>
+                <td>${Number(building.pga).toFixed(3)} m/s²</td>
+                <td>${Number(building.tolerance).toFixed(2)} m/s²</td>
+                <td>${escapeHTML(building.magnitude)}</td>
+                <td>
+                    <span class="status ${building.status}">
+                        ${displayedStatus}
+                    </span>
+                </td>
+            `;
 
-        row.innerHTML = `
+            table.appendChild(row);
 
-            <td>
-                ${escapeHTML(building.name)}
-            </td>
-
-            <td>
-                ${escapeHTML(building.location)}
-            </td>
-
-            <td>
-                ${Number(building.pga).toFixed(3)} m/s²
-            </td>
-
-            <td>
-                ${Number(building.tolerance).toFixed(2)} m/s²
-            </td>
-
-            <td>
-                ${escapeHTML(building.magnitude)}
-            </td>
-
-            <td>
-                <span class="status ${building.status}">
-                    ${displayedStatus}
-                </span>
-            </td>
-
-        `;
-
-
-               table.appendChild(row);
+        });
 
     });
 
-    updateBuildingSummary();
-
 }
 
-/* =====================================
-   BUILDING MONITORING SUMMARY CARDS
-===================================== */
-
-function updateBuildingSummary() {
-
-    const count = status =>
-        buildings.filter(building => building.status === status).length;
-
-    const setValue = (id, value) => {
-
-        const element = document.getElementById(id);
-
-        if (element) {
-
-            element.textContent = value;
-
-        }
-
-    };
-
-    setValue("bmTotal", buildings.length);
-    setValue("bmNormal", count("Normal"));
-    setValue("bmElevated", count("Elevated"));
-    setValue("bmBreached", count("Breached"));
-
-}
 
 /* =====================================
    SUMMARY CARDS
@@ -554,52 +522,35 @@ function updateOverview() {
 
     // Total recorded readings
     if (totalEvents) {
-
         totalEvents.textContent = historyRecords.length;
-
     }
 
 
     // Elevated and breached buildings
     const alertCount = buildings.filter(
-
         building =>
-
             building.status === "Elevated" ||
-
             building.status === "Breached"
-
     ).length;
 
 
     // Affected buildings
     const affectedCount = buildings.filter(
-
         building => building.status !== "Normal"
-
     ).length;
 
 
     if (activeAlerts) {
-
         activeAlerts.textContent = alertCount;
-
     }
-
 
     if (affectedBuildings) {
-
         affectedBuildings.textContent = affectedCount;
-
     }
-
 
     if (monitoredBuildings) {
-
         monitoredBuildings.textContent = buildings.length;
-
     }
-
 
     updateSystemAlert();
 
@@ -615,25 +566,16 @@ function updateSystemAlert() {
     const alertBox =
         document.getElementById("systemAlert");
 
-
     if (!alertBox) {
-
         return;
-
     }
 
-
     const breached = buildings.filter(
-
         building => building.status === "Breached"
-
     );
 
-
     const elevated = buildings.filter(
-
         building => building.status === "Elevated"
-
     );
 
 
@@ -642,29 +584,22 @@ function updateSystemAlert() {
         alertBox.className = "alert danger-alert";
 
         alertBox.textContent =
-
             "THRESHOLD BREACHED: " +
-
             breached.map(building => building.name).join(", ");
-
 
     } else if (elevated.length > 0) {
 
         alertBox.className = "alert warning-alert";
 
         alertBox.textContent =
-
             "WARNING: Elevated seismic activity detected in " +
-
             elevated.map(building => building.name).join(", ") + ".";
-
 
     } else {
 
         alertBox.className = "alert normal-alert";
 
         alertBox.textContent =
-
             "NORMAL: No threshold breach detected.";
 
     }
@@ -680,72 +615,35 @@ function updateSystemAlert() {
 
 function updateSensorReadings(pga) {
 
-    // Sample axis values
-    const x = (
+    // Sample axis values (demonstration data only)
+    const x = (Math.random() * 0.10 - 0.05).toFixed(3);
+    const y = (Math.random() * 0.10 - 0.05).toFixed(3);
+    const z = (9.81 + (Math.random() * 0.10 - 0.05)).toFixed(3);
 
-        Math.random() * 0.10 - 0.05
+    // Keep the Dashboard and Sensor Readings page synchronized.
+    const displayedReadings = {
+        pgaValue: Number(pga).toFixed(3),
+        pgaValuePage: Number(pga).toFixed(3),
+        xValue: x,
+        xValuePage: x,
+        yValue: y,
+        yValuePage: y,
+        zValue: z,
+        zValuePage: z
+    };
 
-    ).toFixed(3);
+    Object.entries(displayedReadings).forEach(([elementId, value]) => {
 
+        const element = document.getElementById(elementId);
 
-    const y = (
+        if (element) {
+            element.textContent = value;
+        }
 
-        Math.random() * 0.10 - 0.05
-
-    ).toFixed(3);
-
-
-    const z = (
-
-        9.81 + (Math.random() * 0.10 - 0.05)
-
-    ).toFixed(3);
-
-
-    // Dashboard sensor elements
-    const pgaElement =
-        document.getElementById("pgaValue");
-
-    const xElement =
-        document.getElementById("xValue");
-
-    const yElement =
-        document.getElementById("yValue");
-
-    const zElement =
-        document.getElementById("zValue");
+    });
 
 
-    if (pgaElement) {
-
-        pgaElement.textContent =
-            Number(pga).toFixed(3);
-
-    }
-
-
-    if (xElement) {
-
-        xElement.textContent = x;
-
-    }
-
-
-    if (yElement) {
-
-        yElement.textContent = y;
-
-    }
-
-
-    if (zElement) {
-
-        zElement.textContent = z;
-
-    }
-
-
-    // Demonstration connectivity values
+    // Demonstration connectivity values shown on the Dashboard.
     const onlineElement =
         document.getElementById("onlineSensors");
 
@@ -757,25 +655,15 @@ function updateSensorReadings(pga) {
 
 
     if (onlineElement) {
-
         onlineElement.textContent = buildings.length;
-
     }
-
 
     if (offlineElement) {
-
         offlineElement.textContent = 0;
-
     }
 
-
     if (transmissionElement) {
-
-        transmissionElement.textContent =
-
-            new Date().toLocaleTimeString();
-
+        transmissionElement.textContent = new Date().toLocaleTimeString();
     }
 
 }
@@ -785,11 +673,10 @@ function updateSensorReadings(pga) {
    CHART.JS INITIALIZATION
 ===================================== */
 
-function initializeChart() {
+function initializeChart(canvasId = "seismicChart") {
 
     const canvas =
-        document.getElementById("seismicChart");
-
+        document.getElementById(canvasId);
 
     if (!canvas || typeof Chart === "undefined") {
 
@@ -801,11 +688,13 @@ function initializeChart() {
 
     }
 
-
     const context = canvas.getContext("2d");
 
+    if (seismicCharts[canvasId]) {
+        return;
+    }
 
-    seismicChart = new Chart(context, {
+    seismicCharts[canvasId] = new Chart(context, {
 
         type: "line",
 
@@ -841,13 +730,11 @@ function initializeChart() {
 
         },
 
-
         options: {
 
             responsive: true,
 
             maintainAspectRatio: false,
-
 
             interaction: {
 
@@ -856,7 +743,6 @@ function initializeChart() {
                 mode: "index"
 
             },
-
 
             plugins: {
 
@@ -869,9 +755,7 @@ function initializeChart() {
                         boxWidth: 12,
 
                         font: {
-
                             size: 10
-
                         }
 
                     }
@@ -879,7 +763,6 @@ function initializeChart() {
                 }
 
             },
-
 
             scales: {
 
@@ -898,15 +781,12 @@ function initializeChart() {
                     ticks: {
 
                         font: {
-
                             size: 10
-
                         }
 
                     }
 
                 },
-
 
                 x: {
 
@@ -921,9 +801,7 @@ function initializeChart() {
                     ticks: {
 
                         font: {
-
                             size: 10
-
                         }
 
                     }
@@ -945,39 +823,24 @@ function initializeChart() {
 
 function updateChart(pga) {
 
-    if (!seismicChart) {
+    const currentTime = new Date().toLocaleTimeString();
+    const currentValue = Number(pga.toFixed(3));
 
-        return;
+    // Update both graph instances with the same live readings.
+    Object.values(seismicCharts).forEach(chart => {
 
-    }
+        chart.data.labels.push(currentTime);
+        chart.data.datasets[0].data.push(currentValue);
 
+        // Keep the latest 15 readings.
+        if (chart.data.labels.length > 15) {
+            chart.data.labels.shift();
+            chart.data.datasets[0].data.shift();
+        }
 
-    const currentTime =
+        chart.update();
 
-        new Date().toLocaleTimeString();
-
-
-    seismicChart.data.labels.push(currentTime);
-
-
-    seismicChart.data.datasets[0].data.push(
-
-        Number(pga.toFixed(3))
-
-    );
-
-
-    // Keep the latest 15 readings
-    if (seismicChart.data.labels.length > 15) {
-
-        seismicChart.data.labels.shift();
-
-        seismicChart.data.datasets[0].data.shift();
-
-    }
-
-
-    seismicChart.update();
+    });
 
 }
 
@@ -1002,15 +865,11 @@ function addHistory(building) {
 
     };
 
-
     historyRecords.unshift(record);
-
 
     // Limit demonstration history to 500 records
     if (historyRecords.length > 500) {
-
         historyRecords = historyRecords.slice(0, 500);
-
     }
 
 }
@@ -1031,7 +890,6 @@ function getRecordDate(record) {
 
     }
 
-
     return record.dateText || "N/A";
 
 }
@@ -1047,7 +905,6 @@ function getRecordTime(record) {
         return new Date(record.timestamp).toLocaleTimeString();
 
     }
-
 
     return record.timeText || "N/A";
 
@@ -1065,7 +922,6 @@ function getRecordDateKey(record) {
 
     }
 
-
     const date = new Date(record.timestamp);
 
     const year = date.getFullYear();
@@ -1077,7 +933,6 @@ function getRecordDateKey(record) {
     const day = String(
         date.getDate()
     ).padStart(2, "0");
-
 
     return `${year}-${month}-${day}`;
 
@@ -1095,7 +950,6 @@ function getRecordTimeKey(record) {
 
     }
 
-
     const date = new Date(record.timestamp);
 
     const hours = String(
@@ -1105,7 +959,6 @@ function getRecordTimeKey(record) {
     const minutes = String(
         date.getMinutes()
     ).padStart(2, "0");
-
 
     return `${hours}:${minutes}`;
 
@@ -1121,27 +974,20 @@ function updateHistoryTable(records = historyRecords) {
     const table =
         document.getElementById("historyTable");
 
-
     if (!table) {
-
         return;
-
     }
 
-
     table.innerHTML = "";
-
 
     if (records.length === 0) {
 
         const row = document.createElement("tr");
 
         row.innerHTML = `
-
             <td colspan="6" class="empty-state">
                 No matching records found.
             </td>
-
         `;
 
         table.appendChild(row);
@@ -1150,42 +996,22 @@ function updateHistoryTable(records = historyRecords) {
 
     }
 
-
     records.forEach(record => {
 
         const row = document.createElement("tr");
 
-
         row.innerHTML = `
-
-            <td>
-                ${escapeHTML(getRecordDate(record))}
-            </td>
-
-            <td>
-                ${escapeHTML(getRecordTime(record))}
-            </td>
-
-            <td>
-                ${escapeHTML(record.building)}
-            </td>
-
-            <td>
-                ${escapeHTML(record.street || record.location || "")}
-            </td>
-
-            <td>
-                ${escapeHTML(record.pga)} m/s²
-            </td>
-
+            <td>${escapeHTML(getRecordDate(record))}</td>
+            <td>${escapeHTML(getRecordTime(record))}</td>
+            <td>${escapeHTML(record.building)}</td>
+            <td>${escapeHTML(record.street || record.location || "")}</td>
+            <td>${escapeHTML(record.pga)} m/s²</td>
             <td>
                 <span class="status ${record.status}">
                     ${escapeHTML(record.status)}
                 </span>
             </td>
-
         `;
-
 
         table.appendChild(row);
 
@@ -1222,16 +1048,12 @@ function filterHistoryRecords() {
 
 
     if (!searchInput || !filterSelect) {
-
         return;
-
     }
 
 
     const searchValue =
-
         searchInput.value.trim().toLowerCase();
-
 
     const selectedFilter = filterSelect.value;
 
@@ -1251,90 +1073,62 @@ function filterHistoryRecords() {
 
     };
 
-
     searchInput.placeholder =
-
         placeholders[selectedFilter] || "Search records...";
 
 
     // Find matching records
     const filteredRecords = historyRecords.filter(record => {
 
-
         // Displayed date and time
         const recordDate =
-
             getRecordDate(record).toLowerCase();
 
-
         const recordTime =
-
             getRecordTime(record).toLowerCase();
 
 
         // Searchable date formats
         const dateKey =
-
             getRecordDateKey(record).toLowerCase();
 
-
         const timeKey =
-
             getRecordTimeKey(record).toLowerCase();
 
 
         const buildingName =
-
             (record.building || "").toLowerCase();
 
-
         const streetLocation =
-
             (record.street || record.location || "").toLowerCase();
 
-
         const pgaValue =
-
             String(record.pga || "").toLowerCase();
 
-
         const statusValue =
-
             String(record.status || "").toLowerCase();
 
 
         // No search value: show every record
         if (searchValue === "") {
-
             return true;
-
         }
 
 
         switch (selectedFilter) {
 
-
             // Search all fields
             case "all":
 
                 return (
-
                     recordDate.includes(searchValue) ||
-
                     recordTime.includes(searchValue) ||
-
                     dateKey.includes(searchValue) ||
-
                     timeKey.includes(searchValue) ||
-
                     buildingName.includes(searchValue) ||
-
                     streetLocation.includes(searchValue) ||
-
                     pgaValue.includes(searchValue) ||
-
                     statusValue.includes(searchValue)
-
                 );
 
 
@@ -1342,11 +1136,8 @@ function filterHistoryRecords() {
             case "date":
 
                 return (
-
                     recordDate.includes(searchValue) ||
-
                     dateKey.includes(searchValue)
-
                 );
 
 
@@ -1366,11 +1157,8 @@ function filterHistoryRecords() {
             case "time":
 
                 return (
-
                     recordTime.includes(searchValue) ||
-
                     timeKey.includes(searchValue)
-
                 );
 
 
@@ -1391,7 +1179,6 @@ function filterHistoryRecords() {
     if (resultCount) {
 
         resultCount.textContent =
-
             `Showing ${filteredRecords.length} of ${historyRecords.length} records.`;
 
     }
@@ -1413,9 +1200,7 @@ function setupHistoryFilters() {
 
 
     if (!searchInput || !filterSelect) {
-
         return;
-
     }
 
 
@@ -1466,66 +1251,43 @@ function exportCSV() {
 
 
     const headers = [
-
         "Date",
-
         "Time",
-
         "Building",
-
         "Street / Location",
-
         "PGA",
-
         "Status"
-
     ];
 
 
     const rows = historyRecords.map(record => [
 
         getRecordDate(record),
-
         getRecordTime(record),
-
         record.building,
-
         record.street || record.location || "",
-
         record.pga,
-
         record.status
 
     ]);
 
 
     const csvContent = [
-
         headers,
-
         ...rows
 
     ]
-
-    .map(row =>
-
-        row.map(value => csvEscape(value)).join(",")
-
-    )
-
-    .join("\r\n");
+        .map(row =>
+            row.map(value => csvEscape(value)).join(",")
+        )
+        .join("\r\n");
 
 
     const blob = new Blob(
-
         ["\uFEFF" + csvContent],
-
         {
-
             type: "text/csv;charset=utf-8;"
-
         }
-
     );
 
 
@@ -1533,18 +1295,15 @@ function exportCSV() {
 
     const link = document.createElement("a");
 
-
     link.href = url;
 
     link.download = "SEVA_Seismic_History.csv";
-
 
     document.body.appendChild(link);
 
     link.click();
 
     link.remove();
-
 
     URL.revokeObjectURL(url);
 
@@ -1694,26 +1453,17 @@ function createImportedRecord(values) {
 
 
     const validStatuses = [
-
         "Normal",
-
         "Elevated",
-
         "Breached",
-
         "Offline"
-
     ];
 
 
     if (
-
         building === "" ||
-
         !Number.isFinite(numericPGA) ||
-
         !validStatuses.includes(status)
-
     ) {
 
         return null;
@@ -1723,18 +1473,14 @@ function createImportedRecord(values) {
 
     // Try to reconstruct timestamp
     const parsedTimestamp = new Date(
-
         `${dateText} ${timeText}`
-
     );
 
 
     return {
 
         timestamp: Number.isNaN(parsedTimestamp.getTime())
-
             ? null
-
             : parsedTimestamp.getTime(),
 
         dateText: dateText,
@@ -1765,9 +1511,7 @@ function setupCSVImport() {
 
 
     if (!importInput) {
-
         return;
-
     }
 
 
@@ -1777,9 +1521,7 @@ function setupCSVImport() {
 
 
         if (!file) {
-
             return;
-
         }
 
 
@@ -1816,16 +1558,11 @@ function setupCSVImport() {
 
                     const values = parseCSVLine(line);
 
-
                     const record = createImportedRecord(values);
 
-
                     if (!record) {
-
                         return;
-
                     }
-
 
                     historyRecords.unshift(record);
 
@@ -1849,11 +1586,8 @@ function setupCSVImport() {
 
 
                 alert(
-
                     `${importedCount} record(s) successfully imported.`
-
                 );
-
 
             }
 
@@ -1862,9 +1596,7 @@ function setupCSVImport() {
                 console.error("CSV import error:", error);
 
                 alert(
-
                     "Unable to import CSV. Please check the file format."
-
                 );
 
             }
@@ -1906,18 +1638,14 @@ function simulateSensorData() {
 
     buildings.forEach(building => {
 
-
         // Simulated PGA from 0.00 to 2.40 m/s²
         building.pga = Math.random() * 2.4;
 
 
         // Determine building status
         building.status = determineStatus(
-
             building.pga,
-
             building.tolerance
-
         );
 
 
@@ -1935,11 +1663,11 @@ function simulateSensorData() {
     }
 
 
-    // Update building table
+    // Update building table on both pages
     updateBuildingTable();
 
 
-    // Update GPS map
+    // Update GPS map on both pages
     updateMapMarkers();
 
 
@@ -1949,17 +1677,15 @@ function simulateSensorData() {
 
     // Get highest PGA
     const highestPGA = Math.max(
-
         ...buildings.map(building => building.pga)
-
     );
 
 
-    // Update sensor readings
+    // Update sensor readings on both pages
     updateSensorReadings(highestPGA);
 
 
-    // Update activity graph
+    // Update activity graphs on both pages
     updateChart(highestPGA);
 
 
@@ -1975,11 +1701,11 @@ function simulateSensorData() {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-
     // Sidebar navigation
     setupNavigation();
 
-
+    setupMenuToggle();
+    
     // History filter and search
     setupHistoryFilters();
 
@@ -1988,12 +1714,16 @@ document.addEventListener("DOMContentLoaded", function () {
     setupCSVImport();
 
 
-    // Initialize Chart.js
-    initializeChart();
+    // Initialize Chart.js for the Dashboard and Activity Monitoring page.
+    initializeChart("seismicChart");
+
+    initializeChart("activityChart");
 
 
-    // Initialize Leaflet
-    initializeMap();
+    // Initialize Leaflet maps for the Dashboard and Activity Monitoring page.
+    initializeMap("map");
+
+    initializeMap("activityMap");
 
 
     // Initial building table
@@ -2010,7 +1740,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Update demonstration readings every 10 seconds
     setInterval(simulateSensorData, 10000);
-
 
 });
 

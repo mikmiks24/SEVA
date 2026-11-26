@@ -338,7 +338,7 @@ section h2 {
 
 
 /* =====================================
-    MAP AND ACTIVITY GRAPH
+   MAP AND ACTIVITY GRAPH
 ===================================== */
 
 .dashboard-grid {
@@ -359,7 +359,8 @@ section h2 {
 
 /* MAP */
 
-#map {
+#map,
+#activityMap {
     height: 350px;
     width: 100%;
 
@@ -854,6 +855,7 @@ footer {
     }
 
     #map,
+    #activityMap,
     .chart-container {
         height: 280px;
     }
@@ -876,7 +878,9 @@ footer {
 }
 
 
-
+/* =====================================
+   PRINT
+===================================== */
 
 @media print {
 
@@ -912,75 +916,127 @@ footer {
 }
 
 /* =====================================
-   BUILDING MONITORING PAGE (LARGE VIEW)
+   HAMBURGER MENU
 ===================================== */
 
-.building-page .topbar h1 {
-    font-size: 34px;
+.menu-toggle {
+    position: fixed;
+    top: 20px;
+    left: 255px;
+    z-index: 1200;
+
+    width: 42px;
+    height: 42px;
+    padding: 9px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+
+    background: var(--primary);
+    border-radius: 7px;
+    cursor: pointer;
+
+    transition: left 0.3s ease, background 0.2s ease;
 }
 
-.building-page .topbar p:not(.eyebrow) {
-    font-size: 16px;
+.menu-toggle:hover {
+    background: var(--accent);
 }
 
-.building-page section.dashboard-section {
-    padding: 32px;
+.menu-toggle span {
+    display: block;
+    width: 21px;
+    height: 2px;
+    background: white;
+    border-radius: 3px;
 }
 
-.building-page section h2 {
-    font-size: 24px;
+
+/* SIDEBAR COLLAPSE - DESKTOP */
+
+.sidebar {
+    transition: transform 0.3s ease;
 }
 
-.building-page .section-description {
-    font-size: 15px;
-    margin-bottom: 22px;
+.main-content {
+    transition: margin-left 0.3s ease, width 0.3s ease;
 }
 
-.building-page .card {
-    padding: 26px;
+.topbar {
+    padding-left: 50px;
 }
 
-.building-page .card p {
-    font-size: 15px;
+body.sidebar-collapsed .sidebar {
+    transform: translateX(-100%);
 }
 
-.building-page .card h3 {
-    font-size: 42px;
+body.sidebar-collapsed .main-content {
+    margin-left: 0;
+    width: 100%;
 }
 
-.building-page .card small {
-    font-size: 13px;
+body.sidebar-collapsed .menu-toggle {
+    left: 18px;
 }
 
-.building-page table {
-    min-width: 900px;
-}
 
-.building-page th,
-.building-page td {
-    font-size: 16px;
-    padding: 22px 20px;
-}
+/* =====================================
+   MOBILE SIDEBAR
+===================================== */
 
-.building-page .status {
-    font-size: 14px;
-    padding: 9px 18px;
-}
+@media (max-width: 600px) {
 
-.building-page #buildingMonitoring {
-    min-height: 55vh;
-}
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
 
-@media (max-width: 900px) {
+        width: min(280px, 85vw);
+        height: 100vh;
 
-    .building-page .card h3 {
-        font-size: 34px;
+        z-index: 1000;
+
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+
+        overflow-y: auto;
     }
 
-    .building-page th,
-    .building-page td {
-        font-size: 14px;
-        padding: 16px 14px;
+    body.sidebar-open .sidebar {
+        transform: translateX(0);
+    }
+
+    body.sidebar-open::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+
+        background: rgba(0, 0, 0, 0.45);
+
+        z-index: 999;
+    }
+
+    .menu-toggle {
+        top: 14px;
+        left: 16px;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 65px 16px 16px;
+    }
+
+    .topbar {
+        padding-left: 0;
+    }
+
+    .sidebar nav {
+        flex-direction: column;
+        gap: 7px;
     }
 
 }

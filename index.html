@@ -23,7 +23,7 @@
 <div class="dashboard">
 
     <!-- SIDEBAR -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
 
         <div class="brand">
             <h2>SEVA</h2>
@@ -38,26 +38,19 @@
                 Dashboard
             </a>
 
-            <a href="#mapSection"
-                data-page="dashboardView"
-                data-scroll="mapSection">
-                GPS Monitoring
+            <a href="#activityMonitoring"
+                data-page="activityMonitoringView">
+                Activity Monitoring
             </a>
 
-            <a href="#analytics"
+            <a href="#buildingMonitoring"
                 data-page="dashboardView"
-                data-scroll="analytics">
-                Activity Graph
-            </a>
-
-            <a href="#buildingView"
-                data-page="buildingView">
+                data-scroll="buildingMonitoring">
                 Building Monitoring
             </a>
 
-            <a href="#sensorReadings"
-                data-page="dashboardView"
-                data-scroll="sensorReadings">
+            <a href="#sensorReadingsPage"
+                data-page="sensorReadingsView">
                 Sensor Readings
             </a>
 
@@ -82,6 +75,19 @@
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
+
+        <button
+        type="button"
+        id="menuToggle"
+        class="menu-toggle"
+        aria-label="Open navigation menu"
+        aria-expanded="true"
+        aria-controls="sidebar">
+
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
 
 
         <!-- =====================================
@@ -163,21 +169,16 @@
             </section>
 
 
-
-            
+            <!-- DASHBOARD MAP AND ACTIVITY GRAPH -->
 
             <div class="dashboard-grid">
 
-
-                
                 <section id="mapSection" class="dashboard-section">
 
                     <div class="section-heading">
-
                         <div>
                             <h2>Barangay Map</h2>
                         </div>
-
                     </div>
 
                     <p class="section-description">
@@ -185,7 +186,6 @@
                     </p>
 
                     <div id="map"></div>
-
 
                     <!-- MAP LEGEND -->
                     <div class="map-legend">
@@ -210,16 +210,12 @@
                 </section>
 
 
-
-                <!-- C. ACTIVITY GRAPH -->
                 <section id="analytics" class="dashboard-section">
 
                     <div class="section-heading">
-
                         <div>
                             <h2>Activity Graph</h2>
                         </div>
-
                     </div>
 
                     <p class="section-description">
@@ -227,9 +223,7 @@
                     </p>
 
                     <div class="chart-container">
-
                         <canvas id="seismicChart"></canvas>
-
                     </div>
 
                     <p class="chart-note">
@@ -243,215 +237,15 @@
 
 
             <!-- =================================
-                REAL-TIME SENSOR READINGS
+                 BUILDING MONITORING
             ================================== -->
 
-            <section id="sensorReadings" class="dashboard-section">
-
-                <div class="section-heading">
-
-                    <div>
-                        <h2>Real-Time Sensor Readings</h2>
-                    </div>
-
-                </div>
-
-                <p class="section-description">
-                    Displays the latest acceleration measurements obtained
-                    from the seismic sensing unit.
-                </p>
-
-
-                <div class="cards sensor-cards">
-
-                    <article class="card">
-
-                        <p>Peak Ground Acceleration (PGA)</p>
-
-                        <h3 id="pgaValue">0.000</h3>
-
-                        <small>m/s²</small>
-
-                    </article>
-
-
-                    <article class="card">
-
-                        <p>X-Axis Acceleration</p>
-
-                        <h3 id="xValue">0.000</h3>
-
-                        <small>m/s²</small>
-
-                    </article>
-
-
-                    <article class="card">
-
-                        <p>Y-Axis Acceleration</p>
-
-                        <h3 id="yValue">0.000</h3>
-
-                        <small>m/s²</small>
-
-                    </article>
-
-
-                    <article class="card">
-
-                        <p>Z-Axis Acceleration</p>
-
-                        <h3 id="zValue">0.000</h3>
-
-                        <small>m/s²</small>
-
-                    </article>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- =================================
-                SENSOR AND SYSTEM STATUS
-            ================================== -->
-
-            <section id="systemStatus" class="dashboard-section">
-
-                <div class="section-heading">
-
-                    <div>
-                        <h2>Sensor and System Status</h2>
-                    </div>
-
-                </div>
-
-
-                <div class="cards status-cards">
-
-
-                    <article class="card status-card">
-
-                        <p>Online Sensors</p>
-
-                        <h3 id="onlineSensors">0</h3>
-
-                        <small>
-                            <span class="status-indicator online-indicator"></span>
-                            Connected
-                        </small>
-
-                    </article>
-
-
-                    <article class="card danger-card status-card">
-
-                        <p>Offline Sensors</p>
-
-                        <h3 id="offlineSensors">0</h3>
-
-                        <small>
-                            <span class="status-indicator offline-indicator"></span>
-                            Disconnected
-                        </small>
-
-                    </article>
-
-
-                    <article class="card status-card last-transmission-card">
-
-                        <p>Last Transmission</p>
-
-                        <h3 id="lastTransmission">Waiting...</h3>
-
-                        <small>Most recent data update</small>
-
-                    </article>
-
-                </div>
-
-
-                <!-- CURRENT SYSTEM ALERT -->
-                <div class="current-alert">
-
-                    <h3>Current System Alert</h3>
-
-                    <div id="systemAlert"
-                        class="alert normal-alert"
-                        role="status"
-                        aria-live="polite">
-
-                        No threshold breach detected.
-
-                    </div>
-
-                </div>
-
-            </section>
-
-        </div>
-
-        <!-- =====================================
-             BUILDING MONITORING PAGE
-        ====================================== -->
-
-        <div id="buildingView" class="page-view building-page hidden">
-
-            <header class="topbar">
-
-                <div>
-                    <p class="eyebrow">SEVA / BUILDINGS</p>
-
-                    <h1>Building Monitoring</h1>
-
-                    <p>Barangay BF Homes, Parañaque City</p>
-                </div>
-
-            </header>
-
-
-            <!-- SUMMARY CARDS -->
-            <section class="dashboard-section">
-
-                <div class="cards summary-cards">
-
-                    <article class="card">
-                        <p>Total Buildings</p>
-                        <h3 id="bmTotal">0</h3>
-                        <small>Registered buildings</small>
-                    </article>
-
-                    <article class="card">
-                        <p>Normal</p>
-                        <h3 id="bmNormal">0</h3>
-                        <small>Within safe range</small>
-                    </article>
-
-                    <article class="card warning-card">
-                        <p>Elevated</p>
-                        <h3 id="bmElevated">0</h3>
-                        <small>Approaching tolerance</small>
-                    </article>
-
-                    <article class="card danger-card">
-                        <p>Threshold Breached</p>
-                        <h3 id="bmBreached">0</h3>
-                        <small>Requires attention</small>
-                    </article>
-
-                </div>
-
-            </section>
-
-
-            <!-- BUILDING TABLE -->
             <section id="buildingMonitoring" class="dashboard-section">
 
                 <div class="section-heading">
 
                     <div>
-                        <h2>Registered Buildings</h2>
+                        <h2>Building Monitoring</h2>
                     </div>
 
                 </div>
@@ -493,7 +287,126 @@
 
             </section>
 
+
+
+            <!-- =================================
+                 REAL-TIME SENSOR READINGS
+            ================================== -->
+
+            <section id="sensorReadings" class="dashboard-section">
+
+                <div class="section-heading">
+                    <div>
+                        <h2>Real-Time Sensor Readings</h2>
+                    </div>
+                </div>
+
+                <p class="section-description">
+                    Displays the latest acceleration measurements obtained
+                    from the seismic sensing unit.
+                </p>
+
+                <div class="cards sensor-cards">
+
+                    <article class="card">
+                        <p>Peak Ground Acceleration (PGA)</p>
+                        <h3 id="pgaValue">0.000</h3>
+                        <small>m/s²</small>
+                    </article>
+
+                    <article class="card">
+                        <p>X-Axis Acceleration</p>
+                        <h3 id="xValue">0.000</h3>
+                        <small>m/s²</small>
+                    </article>
+
+                    <article class="card">
+                        <p>Y-Axis Acceleration</p>
+                        <h3 id="yValue">0.000</h3>
+                        <small>m/s²</small>
+                    </article>
+
+                    <article class="card">
+                        <p>Z-Axis Acceleration</p>
+                        <h3 id="zValue">0.000</h3>
+                        <small>m/s²</small>
+                    </article>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================
+                 SENSOR AND SYSTEM STATUS
+            ================================== -->
+
+            <section id="systemStatus" class="dashboard-section">
+
+                <div class="section-heading">
+                    <div>
+                        <h2>Sensor and System Status</h2>
+                    </div>
+                </div>
+
+                <div class="cards status-cards">
+
+                    <article class="card status-card">
+                        <p>Online Sensors</p>
+
+                        <h3 id="onlineSensors">0</h3>
+
+                        <small>
+                            <span class="status-indicator online-indicator"></span>
+                            Connected
+                        </small>
+                    </article>
+
+
+                    <article class="card danger-card status-card">
+                        <p>Offline Sensors</p>
+
+                        <h3 id="offlineSensors">0</h3>
+
+                        <small>
+                            <span class="status-indicator offline-indicator"></span>
+                            Disconnected
+                        </small>
+                    </article>
+
+
+                    <article class="card status-card last-transmission-card">
+                        <p>Last Transmission</p>
+
+                        <h3 id="lastTransmission">Waiting...</h3>
+
+                        <small>Most recent data update</small>
+                    </article>
+
+                </div>
+
+
+                <!-- CURRENT SYSTEM ALERT -->
+                <div class="current-alert">
+
+                    <h3>Current System Alert</h3>
+
+                    <div id="systemAlert"
+                        class="alert normal-alert"
+                        role="status"
+                        aria-live="polite">
+
+                        No threshold breach detected.
+
+                    </div>
+
+                </div>
+
+            </section>
+
         </div>
+
+
 
         <!-- =====================================
              SEISMIC HISTORY PAGE
@@ -513,7 +426,6 @@
 
             </header>
 
-
             <section class="dashboard-section">
 
                 <h2>Historical Seismic Records</h2>
@@ -522,7 +434,6 @@
                     Search and filter historical seismic records by date,
                     building name, street, or time.
                 </p>
-
 
                 <!-- SEARCH AND FILTER TOOLBAR -->
                 <div class="history-toolbar">
@@ -551,25 +462,15 @@
 
                         <select id="historyFilter">
 
-                            <option value="all">
-                                All Fields
-                            </option>
+                            <option value="all">All Fields</option>
 
-                            <option value="date">
-                                Date
-                            </option>
+                            <option value="date">Date</option>
 
-                            <option value="building">
-                                Building Name
-                            </option>
+                            <option value="building">Building Name</option>
 
-                            <option value="street">
-                                Street / Location
-                            </option>
+                            <option value="street">Street / Location</option>
 
-                            <option value="time">
-                                Time
-                            </option>
+                            <option value="time">Time</option>
 
                         </select>
 
@@ -639,7 +540,6 @@
         </div>
 
 
-
         <!-- =====================================
              REPORTS PAGE
         ====================================== -->
@@ -690,7 +590,6 @@
             </section>
 
         </div>
-
 
 
         <!-- FOOTER -->
