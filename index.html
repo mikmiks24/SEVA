@@ -23,7 +23,7 @@
 <div class="dashboard">
 
     <!-- SIDEBAR -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
 
         <div class="brand">
             <h2>SEVA</h2>
@@ -38,27 +38,18 @@
                 Dashboard
             </a>
 
-            <a href="#mapSection"
-                data-page="dashboardView"
-                data-scroll="mapSection">
-                GPS Monitoring
+            <a href="#activityMonitoring"
+                data-page="activityMonitoringView">
+                Activity Monitoring
             </a>
 
-            <a href="#analytics"
-                data-page="dashboardView"
-                data-scroll="analytics">
-                Activity Graph
-            </a>
-
-            <a href="#buildingMonitoring"
-                data-page="dashboardView"
-                data-scroll="buildingMonitoring">
+            <a href="#buildingMonitoringPage"
+                data-page="buildingMonitoringView">
                 Building Monitoring
             </a>
 
-            <a href="#sensorReadings"
-                data-page="dashboardView"
-                data-scroll="sensorReadings">
+            <a href="#sensorReadingsPage"
+                data-page="sensorReadingsView">
                 Sensor Readings
             </a>
 
@@ -83,6 +74,19 @@
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
+
+        <button
+        type="button"
+        id="menuToggle"
+        class="menu-toggle"
+        aria-label="Open navigation menu"
+        aria-expanded="true"
+        aria-controls="sidebar">
+
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
 
 
         <!-- =====================================
@@ -164,21 +168,16 @@
             </section>
 
 
-
-            
+            <!-- DASHBOARD MAP AND ACTIVITY GRAPH -->
 
             <div class="dashboard-grid">
 
-
-                
                 <section id="mapSection" class="dashboard-section">
 
                     <div class="section-heading">
-
                         <div>
                             <h2>Barangay Map</h2>
                         </div>
-
                     </div>
 
                     <p class="section-description">
@@ -186,7 +185,6 @@
                     </p>
 
                     <div id="map"></div>
-
 
                     <!-- MAP LEGEND -->
                     <div class="map-legend">
@@ -211,16 +209,12 @@
                 </section>
 
 
-
-                <!-- C. ACTIVITY GRAPH -->
                 <section id="analytics" class="dashboard-section">
 
                     <div class="section-heading">
-
                         <div>
                             <h2>Activity Graph</h2>
                         </div>
-
                     </div>
 
                     <p class="section-description">
@@ -228,9 +222,7 @@
                     </p>
 
                     <div class="chart-container">
-
                         <canvas id="seismicChart"></canvas>
-
                     </div>
 
                     <p class="chart-note">
@@ -242,7 +234,6 @@
             </div>
 
 
-
             <!-- =================================
                  BUILDING MONITORING
             ================================== -->
@@ -250,18 +241,15 @@
             <section id="buildingMonitoring" class="dashboard-section">
 
                 <div class="section-heading">
-
                     <div>
                         <h2>Building Monitoring</h2>
                     </div>
-
                 </div>
 
                 <p class="section-description">
                     Monitor the PGA readings, predefined building tolerance,
                     location, and current condition of registered buildings.
                 </p>
-
 
                 <div class="table-container">
 
@@ -295,19 +283,16 @@
             </section>
 
 
-
             <!-- =================================
-                REAL-TIME SENSOR READINGS
+                 REAL-TIME SENSOR READINGS
             ================================== -->
 
             <section id="sensorReadings" class="dashboard-section">
 
                 <div class="section-heading">
-
                     <div>
                         <h2>Real-Time Sensor Readings</h2>
                     </div>
-
                 </div>
 
                 <p class="section-description">
@@ -315,50 +300,30 @@
                     from the seismic sensing unit.
                 </p>
 
-
                 <div class="cards sensor-cards">
 
                     <article class="card">
-
                         <p>Peak Ground Acceleration (PGA)</p>
-
                         <h3 id="pgaValue">0.000</h3>
-
                         <small>m/s²</small>
-
                     </article>
 
-
                     <article class="card">
-
                         <p>X-Axis Acceleration</p>
-
                         <h3 id="xValue">0.000</h3>
-
                         <small>m/s²</small>
-
                     </article>
 
-
                     <article class="card">
-
                         <p>Y-Axis Acceleration</p>
-
                         <h3 id="yValue">0.000</h3>
-
                         <small>m/s²</small>
-
                     </article>
 
-
                     <article class="card">
-
                         <p>Z-Axis Acceleration</p>
-
                         <h3 id="zValue">0.000</h3>
-
                         <small>m/s²</small>
-
                     </article>
 
                 </div>
@@ -366,27 +331,21 @@
             </section>
 
 
-
             <!-- =================================
-                SENSOR AND SYSTEM STATUS
+                 SENSOR AND SYSTEM STATUS
             ================================== -->
 
             <section id="systemStatus" class="dashboard-section">
 
                 <div class="section-heading">
-
                     <div>
                         <h2>Sensor and System Status</h2>
                     </div>
-
                 </div>
-
 
                 <div class="cards status-cards">
 
-
                     <article class="card status-card">
-
                         <p>Online Sensors</p>
 
                         <h3 id="onlineSensors">0</h3>
@@ -395,12 +354,10 @@
                             <span class="status-indicator online-indicator"></span>
                             Connected
                         </small>
-
                     </article>
 
 
                     <article class="card danger-card status-card">
-
                         <p>Offline Sensors</p>
 
                         <h3 id="offlineSensors">0</h3>
@@ -409,18 +366,15 @@
                             <span class="status-indicator offline-indicator"></span>
                             Disconnected
                         </small>
-
                     </article>
 
 
                     <article class="card status-card last-transmission-card">
-
                         <p>Last Transmission</p>
 
                         <h3 id="lastTransmission">Waiting...</h3>
 
                         <small>Most recent data update</small>
-
                     </article>
 
                 </div>
@@ -447,6 +401,228 @@
         </div>
 
 
+        <!-- =====================================
+             ACTIVITY MONITORING PAGE
+        ====================================== -->
+
+        <div id="activityMonitoringView" class="page-view hidden">
+
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">SEVA / MONITORING</p>
+
+                    <h1>Activity Monitoring</h1>
+
+                    <p>
+                        Building locations and seismic activity trends
+                        in Barangay BF Homes, Parañaque City.
+                    </p>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+
+                <!-- MAP SECTION -->
+                <section class="dashboard-section">
+
+                    <div class="section-heading">
+                        <div>
+                            <h2>Barangay Map</h2>
+                        </div>
+                    </div>
+
+                    <p class="section-description">
+                        Building locations and their current seismic status.
+                    </p>
+
+                    <div id="activityMap"></div>
+
+                    <div class="map-legend">
+
+                        <span>
+                            <i class="legend-dot normal-dot"></i>
+                            Normal
+                        </span>
+
+                        <span>
+                            <i class="legend-dot elevated-dot"></i>
+                            Elevated
+                        </span>
+
+                        <span>
+                            <i class="legend-dot breached-dot"></i>
+                            Breached
+                        </span>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ACTIVITY GRAPH SECTION -->
+                <section class="dashboard-section">
+
+                    <div class="section-heading">
+                        <div>
+                            <h2>Activity Graph</h2>
+                        </div>
+                    </div>
+
+                    <p class="section-description">
+                        Seismic readings and ground acceleration trends.
+                    </p>
+
+                    <div class="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+
+                    <p class="chart-note">
+                        Peak Ground Acceleration (PGA), measured in m/s².
+                    </p>
+
+                </section>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================
+             BUILDING MONITORING PAGE
+        ====================================== -->
+
+        <div id="buildingMonitoringView" class="page-view hidden">
+
+            <header class="topbar">
+
+                <div>
+                    <p class="eyebrow">SEVA / BUILDINGS</p>
+
+                    <h1>Building Monitoring</h1>
+
+                    <p>Current seismic condition of registered buildings.</p>
+                </div>
+
+            </header>
+
+            <section class="dashboard-section">
+
+                <div class="section-heading">
+                    <div>
+                        <h2>Building Monitoring Table</h2>
+                    </div>
+                </div>
+
+                <p class="section-description">
+                    Monitor the PGA readings, predefined building tolerance,
+                    location, and current condition of registered buildings.
+                </p>
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Building</th>
+                                <th>Street / Location</th>
+                                <th>PGA</th>
+                                <th>Tolerance</th>
+                                <th>Magnitude</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="buildingTablePage">
+
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    Loading building information...
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- =====================================
+             SENSOR READINGS PAGE
+        ====================================== -->
+
+        <div id="sensorReadingsView" class="page-view hidden">
+
+            <header class="topbar">
+
+                <div>
+                    <p class="eyebrow">SEVA / SENSOR DATA</p>
+
+                    <h1>Sensor Readings</h1>
+
+                    <p>
+                        Latest acceleration measurements from the
+                        seismic sensing unit.
+                    </p>
+                </div>
+
+            </header>
+
+            <section class="dashboard-section">
+
+                <div class="section-heading">
+                    <div>
+                        <h2>Real-Time Sensor Readings</h2>
+                    </div>
+
+                    <span class="live-label">
+                        <span></span>
+                        Live Readings
+                    </span>
+                </div>
+
+                <p class="section-description">
+                    Displays the latest Peak Ground Acceleration (PGA) and
+                    acceleration measurements along the X, Y, and Z axes.
+                </p>
+
+                <div class="cards sensor-cards">
+
+                    <article class="card">
+                        <p>Peak Ground Acceleration (PGA)</p>
+                        <h3 id="pgaValuePage">0.000</h3>
+                        <small>m/s²</small>
+                    </article>
+
+                    <article class="card">
+                        <p>X-Axis Acceleration</p>
+                        <h3 id="xValuePage">0.000</h3>
+                        <small>m/s²</small>
+                    </article>
+
+                    <article class="card">
+                        <p>Y-Axis Acceleration</p>
+                        <h3 id="yValuePage">0.000</h3>
+                        <small>m/s²</small>
+                    </article>
+
+                    <article class="card">
+                        <p>Z-Axis Acceleration</p>
+                        <h3 id="zValuePage">0.000</h3>
+                        <small>m/s²</small>
+                    </article>
+
+                </div>
+
+            </section>
+
+        </div>
+
 
         <!-- =====================================
              SEISMIC HISTORY PAGE
@@ -466,7 +642,6 @@
 
             </header>
 
-
             <section class="dashboard-section">
 
                 <h2>Historical Seismic Records</h2>
@@ -475,7 +650,6 @@
                     Search and filter historical seismic records by date,
                     building name, street, or time.
                 </p>
-
 
                 <!-- SEARCH AND FILTER TOOLBAR -->
                 <div class="history-toolbar">
@@ -504,25 +678,15 @@
 
                         <select id="historyFilter">
 
-                            <option value="all">
-                                All Fields
-                            </option>
+                            <option value="all">All Fields</option>
 
-                            <option value="date">
-                                Date
-                            </option>
+                            <option value="date">Date</option>
 
-                            <option value="building">
-                                Building Name
-                            </option>
+                            <option value="building">Building Name</option>
 
-                            <option value="street">
-                                Street / Location
-                            </option>
+                            <option value="street">Street / Location</option>
 
-                            <option value="time">
-                                Time
-                            </option>
+                            <option value="time">Time</option>
 
                         </select>
 
@@ -592,7 +756,6 @@
         </div>
 
 
-
         <!-- =====================================
              REPORTS PAGE
         ====================================== -->
@@ -643,7 +806,6 @@
             </section>
 
         </div>
-
 
 
         <!-- FOOTER -->

@@ -338,7 +338,7 @@ section h2 {
 
 
 /* =====================================
-    MAP AND ACTIVITY GRAPH
+   MAP AND ACTIVITY GRAPH
 ===================================== */
 
 .dashboard-grid {
@@ -359,7 +359,8 @@ section h2 {
 
 /* MAP */
 
-#map {
+#map,
+#activityMap {
     height: 350px;
     width: 100%;
 
@@ -854,6 +855,7 @@ footer {
     }
 
     #map,
+    #activityMap,
     .chart-container {
         height: 280px;
     }
@@ -876,7 +878,9 @@ footer {
 }
 
 
-
+/* =====================================
+   PRINT
+===================================== */
 
 @media print {
 
@@ -907,6 +911,132 @@ footer {
         box-shadow: none;
         border: 1px solid #DDDDDD;
         break-inside: avoid;
+    }
+
+}
+
+/* =====================================
+   HAMBURGER MENU
+===================================== */
+
+.menu-toggle {
+    position: fixed;
+    top: 20px;
+    left: 255px;
+    z-index: 1200;
+
+    width: 42px;
+    height: 42px;
+    padding: 9px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+
+    background: var(--primary);
+    border-radius: 7px;
+    cursor: pointer;
+
+    transition: left 0.3s ease, background 0.2s ease;
+}
+
+.menu-toggle:hover {
+    background: var(--accent);
+}
+
+.menu-toggle span {
+    display: block;
+    width: 21px;
+    height: 2px;
+    background: white;
+    border-radius: 3px;
+}
+
+
+/* SIDEBAR COLLAPSE - DESKTOP */
+
+.sidebar {
+    transition: transform 0.3s ease;
+}
+
+.main-content {
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.topbar {
+    padding-left: 50px;
+}
+
+body.sidebar-collapsed .sidebar {
+    transform: translateX(-100%);
+}
+
+body.sidebar-collapsed .main-content {
+    margin-left: 0;
+    width: 100%;
+}
+
+body.sidebar-collapsed .menu-toggle {
+    left: 18px;
+}
+
+
+/* =====================================
+   MOBILE SIDEBAR
+===================================== */
+
+@media (max-width: 600px) {
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+
+        width: min(280px, 85vw);
+        height: 100vh;
+
+        z-index: 1000;
+
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+
+        overflow-y: auto;
+    }
+
+    body.sidebar-open .sidebar {
+        transform: translateX(0);
+    }
+
+    body.sidebar-open::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+
+        background: rgba(0, 0, 0, 0.45);
+
+        z-index: 999;
+    }
+
+    .menu-toggle {
+        top: 14px;
+        left: 16px;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 65px 16px 16px;
+    }
+
+    .topbar {
+        padding-left: 0;
+    }
+
+    .sidebar nav {
+        flex-direction: column;
+        gap: 7px;
     }
 
 }
