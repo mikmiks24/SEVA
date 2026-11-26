@@ -657,30 +657,6 @@ tr:hover td {
 }
 
 
-/* =====================================
-   REPORTS
-===================================== */
-
-.report-panel {
-    max-width: 850px;
-}
-
-.report-details {
-    background: #FAF5F5;
-    border: 1px solid #F0E1E1;
-    padding: 17px 20px;
-    border-radius: 8px;
-    margin: 17px 0;
-    font-size: 13px;
-    line-height: 1.8;
-}
-
-.report-details ul {
-    margin-left: 20px;
-    margin-top: 7px;
-    color: #555555;
-}
-
 
 /* =====================================
    FOOTER
