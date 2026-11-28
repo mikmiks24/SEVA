@@ -13,8 +13,6 @@
     <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-bold-straight/css/uicons-bold-straight.css">
     <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/4.0.0/uicons-bold-rounded/css/uicons-bold-rounded.css">
 
-
-    
     <!-- Leaflet Map -->
     <link rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -67,14 +65,14 @@
                 data-page="activityMonitoringView">
 
                 <i class="fi fi-bs-chat-arrow-grow"></i>
-                <span>Activity Monitoring </span>
+                <span>Activity Monitoring</span>
             </a>
 
             <a href="#buildingMonitoringPage"
                 data-page="buildingMonitoringView">
 
                 <i class="fi fi-bs-apartment"></i>
-                <span> Building Monitoring</span> 
+                <span>Building Monitoring</span>
             </a>
 
             <a href="#sensorReadingsPage"
@@ -91,8 +89,6 @@
                 <span>Seismic History</span>
             </a>
 
-
-
         </nav>
 
         <div class="sidebar-footer">
@@ -106,7 +102,7 @@
     <main class="main-content">
 
         <!-- =====================================
-             DASHBOARD - FIRST INTERFACE
+             DASHBOARD
         ====================================== -->
 
         <div id="dashboardView" class="page-view">
@@ -130,7 +126,6 @@
             </header>
 
 
-            
             <!-- =================================
                  SEISMIC MONITORING OVERVIEW
             ================================== -->
@@ -232,7 +227,7 @@
                     </div>
 
                     <p class="section-description">
-                        Seismic readings and ground acceleration trends.
+                        Continuously updating Peak Ground Acceleration (PGA) waveform.
                     </p>
 
                     <div class="chart-container">
@@ -240,7 +235,7 @@
                     </div>
 
                     <p class="chart-note">
-                        Peak Ground Acceleration (PGA), measured in m/s².
+                        PGA waveform (m/s²) · Simulated demonstration signal.
                     </p>
 
                 </section>
@@ -478,7 +473,7 @@
                     </div>
 
                     <p class="section-description">
-                        Seismic readings and ground acceleration trends.
+                        Continuously updating Peak Ground Acceleration (PGA) waveform.
                     </p>
 
                     <div class="chart-container">
@@ -486,7 +481,7 @@
                     </div>
 
                     <p class="chart-note">
-                        Peak Ground Acceleration (PGA), measured in m/s².
+                        PGA waveform (m/s²) · Simulated demonstration signal.
                     </p>
 
                 </section>
@@ -496,122 +491,133 @@
         </div>
 
 
-            <!-- =====================================
-                BUILDING MONITORING PAGE
-            ====================================== -->
+        <!-- =====================================
+             BUILDING MONITORING PAGE
+        ====================================== -->
 
-<div id="buildingMonitoringView" class="page-view hidden">
+        <div id="buildingMonitoringView" class="page-view hidden">
 
-    <header class="topbar">
+            <header class="topbar">
 
-        <div>
-            <p class="eyebrow">SEVA / BUILDINGS</p>
+                <div>
+                    <p class="eyebrow">SEVA / BUILDINGS</p>
 
-            <h1>Building Monitoring</h1>
+                    <h1>Building Monitoring</h1>
 
-            <p>Current seismic condition of registered buildings.</p>
-        </div>
+                    <p>Current seismic condition of registered buildings.</p>
+                </div>
 
-    </header>
+            </header>
 
-    <section class="dashboard-section">
+            <section class="dashboard-section">
 
-        <h2>Registered Buildings</h2>
+                <h2>Registered Buildings</h2>
 
-        <p class="section-description">
-            Select a building from the list, or type to search by name or location.
-        </p>
+                <p class="section-description">
+                    Select a building from the list, or type to search by name or location.
+                </p>
 
-        <!-- Summary tiles -->
-        <div class="bm-summary">
-            <div class="bm-tile">
-                <span>Buildings Shown</span>
-                <strong id="bmShown">0</strong>
-            </div>
-            <div class="bm-tile normal">
-                <span>Normal</span>
-                <strong id="bmNormal">0</strong>
-            </div>
-            <div class="bm-tile elevated">
-                <span>Elevated</span>
-                <strong id="bmElevated">0</strong>
-            </div>
-            <div class="bm-tile breached">
-                <span>Breached</span>
-                <strong id="bmBreached">0</strong>
-            </div>
-        </div>
+                <!-- Summary tiles -->
+                <div class="bm-summary">
 
-        <!-- Search + dropdown (left) and latest capture (right) -->
-        <div class="bm-toolbar">
+                    <div class="bm-tile">
+                        <span>Buildings Shown</span>
+                        <strong id="bmShown">0</strong>
+                    </div>
 
-            <div class="bm-field grow">
-                <label for="bmSearch">Building</label>
+                    <div class="bm-tile normal">
+                        <span>Normal</span>
+                        <strong id="bmNormal">0</strong>
+                    </div>
 
-                <div class="combo" id="bmCombo">
+                    <div class="bm-tile elevated">
+                        <span>Elevated</span>
+                        <strong id="bmElevated">0</strong>
+                    </div>
 
-                    <input type="text" id="bmSearch"
-                           role="combobox"
-                           aria-expanded="false"
-                           aria-controls="bmList"
-                           aria-autocomplete="list"
-                           placeholder="Search or select a building"
-                           autocomplete="off">
-
-                    <button type="button" class="combo-toggle" id="bmToggle"
-                            aria-label="Show buildings">
-                        <svg viewBox="0 0 12 8" width="12" height="8" aria-hidden="true">
-                            <path d="M1 1l5 5 5-5" fill="none" stroke="currentColor"
-                                  stroke-width="1.8" stroke-linecap="round"
-                                  stroke-linejoin="round"/>
-                        </svg>
-                    </button>
-
-                    <ul class="combo-list" id="bmList" role="listbox" hidden></ul>
+                    <div class="bm-tile breached">
+                        <span>Breached</span>
+                        <strong id="bmBreached">0</strong>
+                    </div>
 
                 </div>
-            </div>
 
-            <div class="bm-live">
-                <span class="live-dot"></span>
-                Latest capture: <strong id="bmLastCapture">Waiting...</strong>
-            </div>
+                <!-- Search + dropdown and latest capture -->
+                <div class="bm-toolbar">
+
+                    <div class="bm-field grow">
+                        <label for="bmSearch">Building</label>
+
+                        <div class="combo" id="bmCombo">
+
+                            <input type="text" id="bmSearch"
+                                role="combobox"
+                                aria-expanded="false"
+                                aria-controls="bmList"
+                                aria-autocomplete="list"
+                                placeholder="Search or select a building"
+                                autocomplete="off">
+
+                            <button type="button" class="combo-toggle" id="bmToggle"
+                                aria-label="Show buildings">
+
+                                <svg viewBox="0 0 12 8" width="12" height="8" aria-hidden="true">
+                                    <path d="M1 1l5 5 5-5" fill="none" stroke="currentColor"
+                                        stroke-width="1.8" stroke-linecap="round"
+                                        stroke-linejoin="round"/>
+                                </svg>
+
+                            </button>
+
+                            <ul class="combo-list" id="bmList" role="listbox" hidden></ul>
+
+                        </div>
+
+                    </div>
+
+                    <div class="bm-live">
+                        <span class="live-dot"></span>
+                        Latest capture: <strong id="bmLastCapture">Waiting...</strong>
+                    </div>
+
+                </div>
+
+                <p id="bmResultCount" class="filter-result-count"></p>
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Building</th>
+                                <th>Street / Location</th>
+                                <th>PGA vs Tolerance</th>
+                                <th>Tolerance</th>
+                                <th>Magnitude</th>
+                                <th>Status</th>
+                                <th>Last Capture</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="buildingTablePage">
+
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    Loading building information...
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
 
         </div>
 
-        <p id="bmResultCount" class="filter-result-count"></p>
-
-        <div class="table-container">
-
-            <table>
-
-                <thead>
-                    <tr>
-                        <th>Building</th>
-                        <th>Street / Location</th>
-                        <th>PGA vs Tolerance</th>
-                        <th>Tolerance</th>
-                        <th>Magnitude</th>
-                        <th>Status</th>
-                        <th>Last Capture</th>
-                    </tr>
-                </thead>
-
-                <tbody id="buildingTablePage">
-                    <tr>
-                        <td colspan="7" class="empty-state">
-                            Loading building information...
-                        </td>
-                    </tr>
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </section>
-
-</div>
 
         <!-- =====================================
              SENSOR READINGS PAGE
@@ -738,25 +744,11 @@
 
                         <select id="historyFilter">
 
-                            <option value="all">
-                                All Fields
-                            </option>
-
-                            <option value="date">
-                                Date
-                            </option>
-
-                            <option value="building">
-                                Building Name
-                            </option>
-
-                            <option value="street">
-                                Street / Location
-                            </option>
-
-                            <option value="time">
-                                Time
-                            </option>
+                            <option value="all">All Fields</option>
+                            <option value="date">Date</option>
+                            <option value="building">Building Name</option>
+                            <option value="street">Street / Location</option>
+                            <option value="time">Time</option>
 
                         </select>
 
@@ -798,23 +790,43 @@
 
                 </div>
 
-                <!-- IMPORT AND EXPORT -->
+                <!-- EXPORT FORMAT MENU AND CSV IMPORT -->
                 <div class="action-buttons">
 
-                    <button type="button" onclick="exportCSV()">
-                        Export CSV
-                    </button>
+                    <div class="export-dropdown" id="exportDropdown">
 
-                    <label class="upload-button" for="importCSV">
-                        Import CSV
-                    </label>
+                        <button
+                            type="button"
+                            id="exportToggle"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-controls="exportOptions">
 
-                    <input
-                        type="file"
-                        id="importCSV"
-                        accept=".csv,text/csv"
-                        hidden
-                    >
+                            Export <span class="export-caret" aria-hidden="true">▾</span>
+
+                        </button>
+
+                        <div
+                            class="export-options"
+                            id="exportOptions"
+                            role="group"
+                            aria-label="Choose export format"
+                            hidden>
+
+                            <button type="button" onclick="exportHistoryPDF()">
+                                PDF
+                            </button>
+
+                            <button type="button" onclick="exportHistoryExcel()">
+                                Excel
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    
+                    
 
                 </div>
 
@@ -835,6 +847,14 @@
 
 <!-- LEAFLET JAVASCRIPT -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- PDF EXPORT LIBRARIES -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
+
+<!-- EXCEL EXPORT LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <!-- APPLICATION JAVASCRIPT -->
 <script src="app.js"></script>

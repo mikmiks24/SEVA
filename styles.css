@@ -41,8 +41,7 @@ select {
     font: inherit;
 }
 
-button,
-.upload-button {
+button {
     background: var(--primary);
     color: var(--white);
     border: none;
@@ -55,14 +54,12 @@ button,
     transition: background 0.2s ease;
 }
 
-button:hover,
-.upload-button:hover {
+button:hover {
     background: var(--secondary);
 }
 
 button:focus-visible,
 a:focus-visible,
-.upload-button:focus-visible,
 input:focus-visible,
 select:focus-visible {
     outline: 3px solid rgba(128, 0, 0, 0.25);
@@ -440,7 +437,7 @@ section h2 {
 .chart-container {
     position: relative;
     width: 100%;
-    height: 350px;
+    height: 320px;
 }
 
 .chart-note {
@@ -678,7 +675,7 @@ tr:hover td {
 
 
 /* =====================================
-   CSV IMPORT AND EXPORT
+   HISTORY EXPORT BUTTON
 ===================================== */
 
 .action-buttons {
@@ -689,15 +686,71 @@ tr:hover td {
     margin-top: 15px;
 }
 
-.action-buttons button,
-.action-buttons .upload-button {
+.action-buttons button {
     margin-top: 0;
 }
 
-.upload-button {
-    text-align: center;
+
+/* =====================================
+   HISTORY EXPORT FORMAT MENU
+===================================== */
+
+.export-dropdown {
+    position: relative;
+    display: inline-flex;
 }
 
+.export-dropdown > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 112px;
+}
+
+.export-caret {
+    font-size: 12px;
+    line-height: 1;
+}
+
+.export-options {
+    position: absolute;
+    top: calc(100% + 7px);
+    right: 0;
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 145px;
+    padding: 6px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.14);
+}
+
+.export-options[hidden] {
+    display: none !important;
+}
+
+.export-options button {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--white);
+    color: var(--secondary);
+    text-align: left;
+    border-radius: 5px;
+}
+
+.export-options button:hover {
+    background: var(--light-red);
+    color: var(--secondary);
+}
+
+.export-options button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 1px;
+}
 
 
 /* =====================================
@@ -857,7 +910,6 @@ footer {
 
     .sidebar,
     button,
-    .upload-button,
     .history-toolbar,
     .action-buttons,
     footer {
@@ -1021,11 +1073,14 @@ body.sidebar-collapsed .main-content {
 
 }
 
+
 /* =====================================
    BUILDING MONITORING PAGE
 ===================================== */
 
-/* Summary tiles */
+
+/* SUMMARY TILES */
+
 .bm-summary {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1040,9 +1095,17 @@ body.sidebar-collapsed .main-content {
     padding: 14px 16px;
 }
 
-.bm-tile.normal   { border-left-color: var(--green); }
-.bm-tile.elevated { border-left-color: var(--yellow); }
-.bm-tile.breached { border-left-color: var(--red); }
+.bm-tile.normal {
+    border-left-color: var(--green);
+}
+
+.bm-tile.elevated {
+    border-left-color: var(--yellow);
+}
+
+.bm-tile.breached {
+    border-left-color: var(--red);
+}
 
 .bm-tile span {
     color: var(--muted);
@@ -1056,7 +1119,11 @@ body.sidebar-collapsed .main-content {
     color: var(--secondary);
 }
 
-/* Toolbar row: combobox (left) + latest capture (right) */
+
+/* =====================================
+   BUILDING MONITORING TOOLBAR
+===================================== */
+
 .bm-toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -1082,7 +1149,9 @@ body.sidebar-collapsed .main-content {
     font-weight: 700;
 }
 
-/* Latest capture pill */
+
+/* LATEST CAPTURE PILL */
+
 .bm-live {
     display: inline-flex;
     align-items: center;
@@ -1104,10 +1173,16 @@ body.sidebar-collapsed .main-content {
 }
 
 @keyframes livePulse {
-    50% { opacity: 0.3; }
+    50% {
+        opacity: 0.3;
+    }
 }
 
-/* Search + dropdown (combobox) */
+
+/* =====================================
+   BUILDING SEARCH + DROPDOWN
+===================================== */
+
 .combo {
     position: relative;
     display: flex;
@@ -1235,7 +1310,11 @@ body.sidebar-collapsed .main-content {
     border-radius: 4px;
 }
 
-/* Table extras */
+
+/* =====================================
+   BUILDING TABLE EXTRAS
+===================================== */
+
 .pga-cell {
     min-width: 150px;
 }
@@ -1254,24 +1333,40 @@ body.sidebar-collapsed .main-content {
     transition: width 0.4s ease;
 }
 
-.fill-Normal   { background: var(--green); }
-.fill-Elevated { background: var(--yellow); }
-.fill-Breached { background: var(--red); }
+.fill-Normal {
+    background: var(--green);
+}
+
+.fill-Elevated {
+    background: var(--yellow);
+}
+
+.fill-Breached {
+    background: var(--red);
+}
 
 .capture-cell {
     white-space: nowrap;
     color: var(--muted);
 }
 
-/* Responsive */
+
+/* =====================================
+   BUILDING MONITORING RESPONSIVE
+===================================== */
+
 @media (max-width: 900px) {
+
     .bm-summary {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
 }
 
 @media (max-width: 600px) {
+
     .bm-field.grow {
         max-width: none;
     }
+
 }

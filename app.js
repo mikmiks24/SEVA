@@ -1,7 +1,7 @@
 
-/* =====================================
-   BUILDING INFORMATION
-===================================== */
+// =====================================
+// BUILDING INFORMATION
+// =====================================
 
 const buildings = [
 
@@ -44,26 +44,28 @@ const buildings = [
 ];
 
 
-/* =====================================
-   GLOBAL VARIABLES
-===================================== */
+// =====================================
+// GLOBAL VARIABLES
+// =====================================
 
-// Complete seismic history
 let historyRecords = [];
+let visibleHistoryRecords = [];
 
-// Leaflet maps
+let latestPGAReading = 0;
+let waveformPhase = 0;
+let waveformTimer = null;
+
+const PGA_WAVEFORM_POINTS = 90;
+const PGA_WAVEFORM_INTERVAL_MS = 100;
+
 const maps = {};
-
-// Map markers
 const mapMarkers = {};
-
-// Chart.js instances
 const seismicCharts = {};
 
 
-/* =====================================
-   HTML ESCAPING
-===================================== */
+// =====================================
+// HTML ESCAPING
+// =====================================
 
 function escapeHTML(value) {
 
@@ -84,54 +86,37 @@ function escapeHTML(value) {
 }
 
 
-/* =====================================
-   PAGE NAVIGATION
-===================================== */
+// =====================================
+// PAGE NAVIGATION
+// =====================================
 
 function showPage(pageId) {
 
-    // Hide all pages
     document.querySelectorAll(".page-view").forEach(page => {
-
         page.classList.add("hidden");
-
     });
 
-
-    // Display selected page
     const selectedPage = document.getElementById(pageId);
 
     if (!selectedPage) {
-
         console.warn("Page not found:", pageId);
-
         return;
-
     }
 
     selectedPage.classList.remove("hidden");
 
-
-    // Update active sidebar link
     document.querySelectorAll(".sidebar nav a").forEach(link => {
-
         link.classList.remove("active");
-
     });
-
 
     const activeLink = document.querySelector(
         `.sidebar nav a[data-page="${pageId}"]`
     );
 
     if (activeLink) {
-
         activeLink.classList.add("active");
-
     }
 
-
-    // Refresh maps and graphs after a page becomes visible
     const visibleMapId = {
         dashboardView: "map",
         activityMonitoringView: "activityMap"
@@ -142,9 +127,7 @@ function showPage(pageId) {
         setTimeout(() => {
 
             if (maps[visibleMapId]) {
-
                 maps[visibleMapId].invalidateSize();
-
             }
 
             const visibleChartId = pageId === "dashboardView"
@@ -152,30 +135,24 @@ function showPage(pageId) {
                 : "activityChart";
 
             if (seismicCharts[visibleChartId]) {
-
                 seismicCharts[visibleChartId].resize();
-
             }
 
         }, 150);
 
     }
 
-
     window.scrollTo({
-
         top: 0,
-
         behavior: "smooth"
-
     });
 
 }
 
 
-/* =====================================
-   SIDEBAR NAVIGATION
-===================================== */
+// =====================================
+// SIDEBAR NAVIGATION
+// =====================================
 
 function setupNavigation() {
 
@@ -196,9 +173,9 @@ function setupNavigation() {
 }
 
 
-/* =====================================
-   HAMBURGER / SIDEBAR TOGGLE
-===================================== */
+// =====================================
+// HAMBURGER / SIDEBAR TOGGLE
+// =====================================
 
 function setupMenuToggle() {
 
@@ -206,8 +183,6 @@ function setupMenuToggle() {
 
     if (!menuToggle) return;
 
-
-    // Update button accessibility information
     function updateMenuButton() {
 
         const isCollapsed =
@@ -227,8 +202,6 @@ function setupMenuToggle() {
 
     }
 
-
-    // Collapse or expand the sidebar when clicked
     menuToggle.addEventListener("click", function () {
 
         document.body.classList.toggle("sidebar-collapsed");
@@ -237,8 +210,6 @@ function setupMenuToggle() {
 
     });
 
-
-    // Close the navigation after selecting a page on mobile
     document.querySelectorAll(".sidebar nav a[data-page]")
 
         .forEach(link => {
@@ -259,48 +230,33 @@ function setupMenuToggle() {
 
         });
 
-
-    // Handle screen resizing
     window.addEventListener("resize", function () {
 
         if (window.innerWidth > 600) {
-
             document.body.classList.remove("sidebar-collapsed");
-
         }
 
         updateMenuButton();
 
     });
 
-
     updateMenuButton();
 
 }
 
 
-/* =====================================
-   STATUS CLASSIFICATION
-
-   Demonstration threshold:
-   60% of building tolerance = Elevated.
-
-   This threshold must be validated
-   against the project's engineering basis.
-===================================== */
+// =====================================
+// STATUS CLASSIFICATION
+// =====================================
 
 function determineStatus(pga, tolerance) {
 
     if (pga >= tolerance) {
-
         return "Breached";
-
     }
 
     if (pga >= tolerance * 0.60) {
-
         return "Elevated";
-
     }
 
     return "Normal";
@@ -308,9 +264,9 @@ function determineStatus(pga, tolerance) {
 }
 
 
-/* =====================================
-   LEAFLET MAP INITIALIZATION
-===================================== */
+// =====================================
+// LEAFLET MAP INITIALIZATION
+// =====================================
 
 function initializeMap(mapId = "map") {
 
@@ -328,70 +284,45 @@ function initializeMap(mapId = "map") {
 
     }
 
-
-    // Avoid initializing the same map more than once
     if (maps[mapId]) {
-
         return;
-
     }
 
-
-    // BF Homes, Parañaque City
     const mapInstance = L.map(mapId).setView(
-
         [14.44577, 121.02714],
-
         16
-
     );
 
-
-    // OpenStreetMap
     L.tileLayer(
-
         "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-
         {
-
             maxZoom: 19,
-
             attribution:
                 '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
-
             referrerPolicy: "strict-origin-when-cross-origin"
-
         }
-
     ).addTo(mapInstance);
 
-
     maps[mapId] = mapInstance;
-
     mapMarkers[mapId] = {};
-
 
     updateMapMarkers();
 
 }
 
 
-/* =====================================
-   MAP MARKER COLORS
-===================================== */
+// =====================================
+// MAP MARKER COLORS
+// =====================================
 
 function getMarkerColor(status) {
 
     if (status === "Breached") {
-
         return "#DC3545";
-
     }
 
     if (status === "Elevated") {
-
         return "#E5A000";
-
     }
 
     return "#198754";
@@ -399,9 +330,9 @@ function getMarkerColor(status) {
 }
 
 
-/* =====================================
-   UPDATE GPS MAP MARKERS
-===================================== */
+// =====================================
+// UPDATE GPS MAP MARKERS
+// =====================================
 
 function updateMapMarkers() {
 
@@ -409,16 +340,12 @@ function updateMapMarkers() {
         Object.keys(maps).length === 0 ||
         typeof L === "undefined"
     ) {
-
         return;
-
     }
-
 
     buildings.forEach(building => {
 
         const markerColor = getMarkerColor(building.status);
-
 
         const markerIcon = L.divIcon({
 
@@ -436,63 +363,44 @@ function updateMapMarkers() {
             `,
 
             iconSize: [18, 18],
-
             iconAnchor: [9, 9]
 
         });
 
-
         const popupContent = `
-
             <strong>${escapeHTML(building.name)}</strong><br>
-
             Location: ${escapeHTML(building.location)}<br>
-
             PGA: ${Number(building.pga).toFixed(3)} m/s²<br>
-
             Tolerance: ${Number(building.tolerance).toFixed(2)} m/s²<br>
-
             Status: ${escapeHTML(building.status)}
-
         `;
 
-
-        // Update markers on both maps
         Object.entries(maps).forEach(([mapId, mapInstance]) => {
 
             const markersForMap = mapMarkers[mapId];
 
-
             if (markersForMap[building.id]) {
 
                 markersForMap[building.id]
-
                     .setLatLng([
                         building.latitude,
                         building.longitude
                     ])
-
                     .setIcon(markerIcon)
-
                     .setPopupContent(popupContent);
 
             } else {
 
                 markersForMap[building.id] = L.marker(
-
                     [
                         building.latitude,
                         building.longitude
                     ],
-
                     {
                         icon: markerIcon
                     }
-
                 )
-
                 .addTo(mapInstance)
-
                 .bindPopup(popupContent);
 
             }
@@ -503,11 +411,16 @@ function updateMapMarkers() {
 
 }
 
-/* =====================================
-   BUILDING MONITORING: FILTERS, TABLE, CAPTURE TIME
-===================================== */
 
-const buildingFilters = { building: "all", search: "" };
+// =====================================
+// BUILDING MONITORING FILTERS
+// =====================================
+
+const buildingFilters = {
+    building: "all",
+    search: ""
+};
+
 
 function getFilteredBuildings() {
 
@@ -530,6 +443,7 @@ function getFilteredBuildings() {
 
 }
 
+
 function formatCapture(timestamp) {
 
     if (!timestamp) {
@@ -539,28 +453,36 @@ function formatCapture(timestamp) {
     const date = new Date(timestamp);
 
     return date.toLocaleDateString(undefined, {
-        month: "short", day: "numeric", year: "numeric"
+        month: "short",
+        day: "numeric",
+        year: "numeric"
     }) + " · " + date.toLocaleTimeString();
 
 }
+
 
 function updateLastCapture() {
 
     const element = document.getElementById("bmLastCapture");
 
-    if (!element) {
-        return;
-    }
+    if (!element) return;
 
-    const latest = Math.max(0, ...buildings.map(b => b.lastCapture || 0));
+    const latest = Math.max(
+        0,
+        ...buildings.map(b => b.lastCapture || 0)
+    );
 
     element.textContent = formatCapture(latest);
 
 }
 
+
+// =====================================
+// UPDATE BUILDING TABLES
+// =====================================
+
 function updateBuildingTable() {
 
-    // Dashboard table (optional): always shows every building
     const dashboardTable = document.getElementById("buildingTable");
 
     if (dashboardTable) {
@@ -582,13 +504,9 @@ function updateBuildingTable() {
 
     }
 
-
-    // Building Monitoring page
     const pageTable = document.getElementById("buildingTablePage");
 
-    if (!pageTable) {
-        return;
-    }
+    if (!pageTable) return;
 
     const list = getFilteredBuildings();
 
@@ -641,36 +559,50 @@ function updateBuildingTable() {
 
     }
 
-
-    // Summary tiles and result count
     const setText = (id, value) => {
         const element = document.getElementById(id);
         if (element) element.textContent = value;
     };
 
     setText("bmShown", list.length);
-    setText("bmNormal", list.filter(b => b.status === "Normal").length);
-    setText("bmElevated", list.filter(b => b.status === "Elevated").length);
-    setText("bmBreached", list.filter(b => b.status === "Breached").length);
-    setText("bmResultCount", `Showing ${list.length} of ${buildings.length} buildings.`);
+
+    setText(
+        "bmNormal",
+        list.filter(b => b.status === "Normal").length
+    );
+
+    setText(
+        "bmElevated",
+        list.filter(b => b.status === "Elevated").length
+    );
+
+    setText(
+        "bmBreached",
+        list.filter(b => b.status === "Breached").length
+    );
+
+    setText(
+        "bmResultCount",
+        `Showing ${list.length} of ${buildings.length} buildings.`
+    );
 
     updateLastCapture();
 
 }
 
 
-/* Search + dropdown (combobox) */
+// =====================================
+// BUILDING SEARCH + DROPDOWN
+// =====================================
 
 function setupBuildingFilters() {
 
-    const combo  = document.getElementById("bmCombo");
-    const input  = document.getElementById("bmSearch");
+    const combo = document.getElementById("bmCombo");
+    const input = document.getElementById("bmSearch");
     const toggle = document.getElementById("bmToggle");
-    const list   = document.getElementById("bmList");
+    const list = document.getElementById("bmList");
 
-    if (!combo || !input || !toggle || !list) {
-        return;
-    }
+    if (!combo || !input || !toggle || !list) return;
 
     let activeIndex = -1;
     let visibleItems = [];
@@ -701,9 +633,12 @@ function setupBuildingFilters() {
         visibleItems = getItems();
 
         if (visibleItems.length === 0) {
+
             list.innerHTML =
                 '<li class="combo-empty">No matching buildings</li>';
+
             return;
+
         }
 
         list.innerHTML = visibleItems.map((item, index) => {
@@ -724,17 +659,25 @@ function setupBuildingFilters() {
     }
 
     function openList() {
+
         combo.classList.add("open");
         list.hidden = false;
+
         input.setAttribute("aria-expanded", "true");
+
         renderList();
+
     }
 
     function closeList() {
+
         combo.classList.remove("open");
         list.hidden = true;
+
         input.setAttribute("aria-expanded", "false");
+
         activeIndex = -1;
+
     }
 
     function choose(id) {
@@ -749,42 +692,57 @@ function setupBuildingFilters() {
         input.value = selected ? selected.name : "";
 
         closeList();
+
         updateBuildingTable();
 
     }
 
-    // Typing searches and clears any selected building
     input.addEventListener("input", () => {
+
         buildingFilters.building = "all";
         buildingFilters.search = input.value;
+
         activeIndex = -1;
+
         openList();
+
         updateBuildingTable();
+
     });
 
     input.addEventListener("click", () => {
+
         if (!combo.classList.contains("open")) {
             openList();
         }
+
     });
 
     toggle.addEventListener("click", () => {
+
         if (combo.classList.contains("open")) {
+
             closeList();
+
         } else {
+
             openList();
             input.focus();
+
         }
+
     });
 
-    // Keep focus in the input while clicking an option
     list.addEventListener("mousedown", event => event.preventDefault());
 
     list.addEventListener("click", event => {
+
         const option = event.target.closest("li[data-id]");
+
         if (option) {
             choose(option.dataset.id);
         }
+
     });
 
     input.addEventListener("keydown", event => {
@@ -808,6 +766,7 @@ function setupBuildingFilters() {
         } else if (event.key === "Enter" && activeIndex >= 0) {
 
             event.preventDefault();
+
             choose(visibleItems[activeIndex].id);
 
         } else if (event.key === "Escape") {
@@ -818,147 +777,98 @@ function setupBuildingFilters() {
 
     });
 
-    // Close when clicking outside
     document.addEventListener("click", event => {
+
         if (!combo.contains(event.target)) {
             closeList();
         }
+
     });
 
 }
 
-/* =====================================
-   SUMMARY CARDS
-===================================== */
+
+// =====================================
+// SUMMARY CARDS
+// =====================================
 
 function updateOverview() {
 
-    const totalEvents =
-        document.getElementById("totalEvents");
+    const totalEvents = document.getElementById("totalEvents");
+    const activeAlerts = document.getElementById("activeAlerts");
+    const affectedBuildings = document.getElementById("affectedBuildings");
+    const monitoredBuildings = document.getElementById("monitoredBuildings");
 
-    const activeAlerts =
-        document.getElementById("activeAlerts");
-
-    const affectedBuildings =
-        document.getElementById("affectedBuildings");
-
-    const monitoredBuildings =
-        document.getElementById("monitoredBuildings");
-
-
-    // Total recorded readings
     if (totalEvents) {
-
         totalEvents.textContent = historyRecords.length;
-
     }
 
-
-    // Elevated and breached buildings
     const alertCount = buildings.filter(
-
         building =>
-
             building.status === "Elevated" ||
-
             building.status === "Breached"
-
     ).length;
 
-
-    // Affected buildings
     const affectedCount = buildings.filter(
-
         building => building.status !== "Normal"
-
     ).length;
-
 
     if (activeAlerts) {
-
         activeAlerts.textContent = alertCount;
-
     }
-
 
     if (affectedBuildings) {
-
         affectedBuildings.textContent = affectedCount;
-
     }
-
 
     if (monitoredBuildings) {
-
         monitoredBuildings.textContent = buildings.length;
-
     }
-
 
     updateSystemAlert();
 
 }
 
 
-/* =====================================
-   CURRENT SYSTEM ALERT
-===================================== */
+// =====================================
+// CURRENT SYSTEM ALERT
+// =====================================
 
 function updateSystemAlert() {
 
-    const alertBox =
-        document.getElementById("systemAlert");
+    const alertBox = document.getElementById("systemAlert");
 
-
-    if (!alertBox) {
-
-        return;
-
-    }
-
+    if (!alertBox) return;
 
     const breached = buildings.filter(
-
         building => building.status === "Breached"
-
     );
-
 
     const elevated = buildings.filter(
-
         building => building.status === "Elevated"
-
     );
-
 
     if (breached.length > 0) {
 
         alertBox.className = "alert danger-alert";
 
         alertBox.textContent =
-
             "THRESHOLD BREACHED: " +
-
             breached.map(building => building.name).join(", ");
-
 
     } else if (elevated.length > 0) {
 
         alertBox.className = "alert warning-alert";
 
         alertBox.textContent =
-
             "WARNING: Elevated seismic activity detected in " +
-
             elevated.map(building => building.name).join(", ") + ".";
-
 
     } else {
 
         alertBox.className = "alert normal-alert";
 
         alertBox.textContent =
-
             "NORMAL: No threshold breach detected.";
 
     }
@@ -966,115 +876,77 @@ function updateSystemAlert() {
 }
 
 
-/* =====================================
-   REAL-TIME SENSOR READINGS
-
-   Demonstration values only.
-===================================== */
+// =====================================
+// REAL-TIME SENSOR READINGS
+// Demonstration values only.
+// =====================================
 
 function updateSensorReadings(pga) {
 
-    // Sample axis values
     const x = (
-
         Math.random() * 0.10 - 0.05
-
     ).toFixed(3);
-
 
     const y = (
-
         Math.random() * 0.10 - 0.05
-
     ).toFixed(3);
-
 
     const z = (
-
         9.81 + (Math.random() * 0.10 - 0.05)
-
     ).toFixed(3);
 
-
-    // Dashboard and Sensor Readings page
     const displayedReadings = {
 
         pgaValue: Number(pga).toFixed(3),
-
         pgaValuePage: Number(pga).toFixed(3),
 
         xValue: x,
-
         xValuePage: x,
 
         yValue: y,
-
         yValuePage: y,
 
         zValue: z,
-
         zValuePage: z
 
     };
-
 
     Object.entries(displayedReadings).forEach(([elementId, value]) => {
 
         const element = document.getElementById(elementId);
 
         if (element) {
-
             element.textContent = value;
-
         }
 
     });
 
-
-    // Demonstration connectivity values
-    const onlineElement =
-        document.getElementById("onlineSensors");
-
-    const offlineElement =
-        document.getElementById("offlineSensors");
-
-    const transmissionElement =
-        document.getElementById("lastTransmission");
-
+    const onlineElement = document.getElementById("onlineSensors");
+    const offlineElement = document.getElementById("offlineSensors");
+    const transmissionElement = document.getElementById("lastTransmission");
 
     if (onlineElement) {
-
         onlineElement.textContent = buildings.length;
-
     }
-
 
     if (offlineElement) {
-
         offlineElement.textContent = 0;
-
     }
 
-
     if (transmissionElement) {
-
-        transmissionElement.textContent =
-            new Date().toLocaleTimeString();
-
+        transmissionElement.textContent = new Date().toLocaleTimeString();
     }
 
 }
 
 
-/* =====================================
-   CHART.JS INITIALIZATION
-===================================== */
+// =====================================
+// CHART.JS INITIALIZATION
+// =====================================
 
 function initializeChart(canvasId = "seismicChart") {
 
-    const canvas =
-        document.getElementById(canvasId);
-
+    const canvas = document.getElementById(canvasId);
 
     if (!canvas || typeof Chart === "undefined") {
 
@@ -1086,16 +958,9 @@ function initializeChart(canvasId = "seismicChart") {
 
     }
 
+    if (seismicCharts[canvasId]) return;
 
     const context = canvas.getContext("2d");
-
-
-    if (seismicCharts[canvasId]) {
-
-        return;
-
-    }
-
 
     seismicCharts[canvasId] = new Chart(context, {
 
@@ -1109,23 +974,25 @@ function initializeChart(canvasId = "seismicChart") {
 
                 {
 
-                    label: "Peak Ground Acceleration (m/s²)",
+                    label: "PGA (m/s²)",
 
                     data: [],
 
                     borderColor: "#800000",
 
-                    backgroundColor: "rgba(128,0,0,0.13)",
+                    backgroundColor: "rgba(128, 0, 0, 0.12)",
 
                     borderWidth: 2,
 
-                    pointRadius: 3,
+                    pointRadius: 0,
+
+                    pointHoverRadius: 3,
 
                     pointBackgroundColor: "#800000",
 
                     fill: true,
 
-                    tension: 0.3
+                    tension: 0.22
 
                 }
 
@@ -1133,21 +1000,21 @@ function initializeChart(canvasId = "seismicChart") {
 
         },
 
-
         options: {
 
             responsive: true,
 
             maintainAspectRatio: false,
 
+            animation: false,
+
             interaction: {
 
                 intersect: false,
 
-                mode: "index"
+                mode: "nearest"
 
             },
-
 
             plugins: {
 
@@ -1160,9 +1027,7 @@ function initializeChart(canvasId = "seismicChart") {
                         boxWidth: 12,
 
                         font: {
-
                             size: 10
-
                         }
 
                     }
@@ -1171,12 +1036,13 @@ function initializeChart(canvasId = "seismicChart") {
 
             },
 
-
             scales: {
 
                 y: {
 
                     beginAtZero: true,
+
+                    suggestedMax: 0.5,
 
                     title: {
 
@@ -1187,17 +1053,12 @@ function initializeChart(canvasId = "seismicChart") {
                     },
 
                     ticks: {
-
                         font: {
-
                             size: 10
-
                         }
-
                     }
 
                 },
-
 
                 x: {
 
@@ -1211,10 +1072,14 @@ function initializeChart(canvasId = "seismicChart") {
 
                     ticks: {
 
+                        autoSkip: true,
+
+                        maxTicksLimit: 6,
+
+                        maxRotation: 0,
+
                         font: {
-
                             size: 10
-
                         }
 
                     }
@@ -1230,45 +1095,76 @@ function initializeChart(canvasId = "seismicChart") {
 }
 
 
-/* =====================================
-   UPDATE ACTIVITY GRAPH
-===================================== */
+// =====================================
+// CONTINUOUS PGA WAVEFORM
+// =====================================
 
 function updateChart(pga) {
 
-    const currentTime = new Date().toLocaleTimeString();
+    const numericPGA = Number(pga);
 
-    const currentValue = Number(pga.toFixed(3));
+    if (Number.isFinite(numericPGA)) {
 
+        latestPGAReading = Math.max(0, numericPGA);
 
-    // Update both graph instances
-    Object.values(seismicCharts).forEach(chart => {
-
-        chart.data.labels.push(currentTime);
-
-        chart.data.datasets[0].data.push(currentValue);
-
-
-        // Keep the latest 15 readings
-        if (chart.data.labels.length > 15) {
-
-            chart.data.labels.shift();
-
-            chart.data.datasets[0].data.shift();
-
-        }
-
-
-        chart.update();
-
-    });
+    }
 
 }
 
 
-/* =====================================
-   CREATE HISTORY RECORD
-===================================== */
+function startPGAWaveform() {
+
+    if (waveformTimer) {
+        clearInterval(waveformTimer);
+    }
+
+    waveformTimer = setInterval(() => {
+
+        waveformPhase += 0.20;
+
+        const peak = Math.max(0, latestPGAReading);
+
+        const waveEnvelope =
+            0.12 + (0.88 * Math.abs(Math.sin(waveformPhase)));
+
+        const smallVariation =
+            0.96 + (Math.random() * 0.04);
+
+        const pgaSample = Number(
+            (peak * waveEnvelope * smallVariation).toFixed(3)
+        );
+
+        const timestamp = new Date().toLocaleTimeString();
+
+        Object.values(seismicCharts).forEach(chart => {
+
+            chart.data.labels.push(timestamp);
+
+            chart.data.datasets[0].data.push(pgaSample);
+
+            while (chart.data.labels.length > PGA_WAVEFORM_POINTS) {
+
+                chart.data.labels.shift();
+
+                chart.data.datasets[0].data.shift();
+
+            }
+
+            chart.options.scales.y.suggestedMax =
+                Math.max(0.1, peak * 1.15);
+
+            chart.update("none");
+
+        });
+
+    }, PGA_WAVEFORM_INTERVAL_MS);
+
+}
+
+
+// =====================================
+// CREATE HISTORY RECORD
+// =====================================
 
 function addHistory(building) {
 
@@ -1286,11 +1182,8 @@ function addHistory(building) {
 
     };
 
-
     historyRecords.unshift(record);
 
-
-    // Limit demonstration history to 500 records
     if (historyRecords.length > 500) {
 
         historyRecords = historyRecords.slice(0, 500);
@@ -1300,24 +1193,20 @@ function addHistory(building) {
 }
 
 
-/* =====================================
-   DATE AND TIME FORMATTING
-===================================== */
+// =====================================
+// DATE AND TIME FORMATTING
+// =====================================
 
 function getRecordDate(record) {
 
     if (
-
         typeof record.timestamp === "number" &&
-
         Number.isFinite(record.timestamp)
-
     ) {
 
         return new Date(record.timestamp).toLocaleDateString();
 
     }
-
 
     return record.dateText || "N/A";
 
@@ -1327,17 +1216,13 @@ function getRecordDate(record) {
 function getRecordTime(record) {
 
     if (
-
         typeof record.timestamp === "number" &&
-
         Number.isFinite(record.timestamp)
-
     ) {
 
         return new Date(record.timestamp).toLocaleTimeString();
 
     }
-
 
     return record.timeText || "N/A";
 
@@ -1347,37 +1232,23 @@ function getRecordTime(record) {
 function getRecordDateKey(record) {
 
     if (
-
         typeof record.timestamp !== "number" ||
-
         !Number.isFinite(record.timestamp)
-
     ) {
-
         return "";
-
     }
-
 
     const date = new Date(record.timestamp);
 
-
     const year = date.getFullYear();
 
-
     const month = String(
-
         date.getMonth() + 1
-
     ).padStart(2, "0");
-
 
     const day = String(
-
         date.getDate()
-
     ).padStart(2, "0");
-
 
     return `${year}-${month}-${day}`;
 
@@ -1387,73 +1258,48 @@ function getRecordDateKey(record) {
 function getRecordTimeKey(record) {
 
     if (
-
         typeof record.timestamp !== "number" ||
-
         !Number.isFinite(record.timestamp)
-
     ) {
-
         return "";
-
     }
-
 
     const date = new Date(record.timestamp);
 
-
     const hours = String(
-
         date.getHours()
-
     ).padStart(2, "0");
-
 
     const minutes = String(
-
         date.getMinutes()
-
     ).padStart(2, "0");
-
 
     return `${hours}:${minutes}`;
 
 }
 
 
-/* =====================================
-   SEISMIC HISTORY TABLE
-===================================== */
+// =====================================
+// SEISMIC HISTORY TABLE
+// =====================================
 
 function updateHistoryTable(records = historyRecords) {
 
-    const table =
-        document.getElementById("historyTable");
+    const table = document.getElementById("historyTable");
 
-
-    if (!table) {
-
-        return;
-
-    }
-
+    if (!table) return;
 
     table.innerHTML = "";
-
 
     if (records.length === 0) {
 
         const row = document.createElement("tr");
 
-
         row.innerHTML = `
-
             <td colspan="6" class="empty-state">
                 No matching records found.
             </td>
-
         `;
-
 
         table.appendChild(row);
 
@@ -1461,33 +1307,21 @@ function updateHistoryTable(records = historyRecords) {
 
     }
 
-
     records.forEach(record => {
 
         const row = document.createElement("tr");
 
-
         row.innerHTML = `
 
-            <td>
-                ${escapeHTML(getRecordDate(record))}
-            </td>
+            <td>${escapeHTML(getRecordDate(record))}</td>
 
-            <td>
-                ${escapeHTML(getRecordTime(record))}
-            </td>
+            <td>${escapeHTML(getRecordTime(record))}</td>
 
-            <td>
-                ${escapeHTML(record.building)}
-            </td>
+            <td>${escapeHTML(record.building)}</td>
 
-            <td>
-                ${escapeHTML(record.street || record.location || "")}
-            </td>
+            <td>${escapeHTML(record.street || record.location || "")}</td>
 
-            <td>
-                ${escapeHTML(record.pga)} m/s²
-            </td>
+            <td>${escapeHTML(record.pga)} m/s²</td>
 
             <td>
                 <span class="status ${record.status}">
@@ -1497,7 +1331,6 @@ function updateHistoryTable(records = historyRecords) {
 
         `;
 
-
         table.appendChild(row);
 
     });
@@ -1505,45 +1338,24 @@ function updateHistoryTable(records = historyRecords) {
 }
 
 
-/* =====================================
-   HISTORY FILTER FUNCTION
-
-   Filter options:
-   1. All Fields
-   2. Date
-   3. Building Name
-   4. Street / Location
-   5. Time
-===================================== */
+// =====================================
+// HISTORY FILTER FUNCTION
+// =====================================
 
 function filterHistoryRecords() {
 
-    const searchInput =
-        document.getElementById("searchHistory");
+    const searchInput = document.getElementById("searchHistory");
 
-    const filterSelect =
-        document.getElementById("historyFilter");
+    const filterSelect = document.getElementById("historyFilter");
 
-    const resultCount =
-        document.getElementById("filterResultCount");
+    const resultCount = document.getElementById("filterResultCount");
 
+    if (!searchInput || !filterSelect) return;
 
-    if (!searchInput || !filterSelect) {
-
-        return;
-
-    }
-
-
-    const searchValue =
-
-        searchInput.value.trim().toLowerCase();
-
+    const searchValue = searchInput.value.trim().toLowerCase();
 
     const selectedFilter = filterSelect.value;
 
-
-    // Update search placeholder
     const placeholders = {
 
         all: "Search all records...",
@@ -1558,126 +1370,71 @@ function filterHistoryRecords() {
 
     };
 
-
     searchInput.placeholder =
-
         placeholders[selectedFilter] || "Search records...";
 
-
-    // Find matching records
     const filteredRecords = historyRecords.filter(record => {
 
+        const recordDate = getRecordDate(record).toLowerCase();
 
-        const recordDate =
+        const recordTime = getRecordTime(record).toLowerCase();
 
-            getRecordDate(record).toLowerCase();
+        const dateKey = getRecordDateKey(record).toLowerCase();
 
-
-        const recordTime =
-
-            getRecordTime(record).toLowerCase();
-
-
-        const dateKey =
-
-            getRecordDateKey(record).toLowerCase();
-
-
-        const timeKey =
-
-            getRecordTimeKey(record).toLowerCase();
-
+        const timeKey = getRecordTimeKey(record).toLowerCase();
 
         const buildingName =
-
             (record.building || "").toLowerCase();
 
-
         const streetLocation =
-
             (record.street || record.location || "").toLowerCase();
 
-
         const pgaValue =
-
             String(record.pga || "").toLowerCase();
 
-
         const statusValue =
-
             String(record.status || "").toLowerCase();
 
-
-        // No search value: show every record
         if (searchValue === "") {
-
             return true;
-
         }
-
 
         switch (selectedFilter) {
 
-
-            // Search all fields
             case "all":
 
                 return (
-
                     recordDate.includes(searchValue) ||
-
                     recordTime.includes(searchValue) ||
-
                     dateKey.includes(searchValue) ||
-
                     timeKey.includes(searchValue) ||
-
                     buildingName.includes(searchValue) ||
-
                     streetLocation.includes(searchValue) ||
-
                     pgaValue.includes(searchValue) ||
-
                     statusValue.includes(searchValue)
-
                 );
 
-
-            // Search by date
             case "date":
 
                 return (
-
                     recordDate.includes(searchValue) ||
-
                     dateKey.includes(searchValue)
-
                 );
 
-
-            // Search by building name
             case "building":
 
                 return buildingName.includes(searchValue);
 
-
-            // Search by street or location
             case "street":
 
                 return streetLocation.includes(searchValue);
 
-
-            // Search by time
             case "time":
 
                 return (
-
                     recordTime.includes(searchValue) ||
-
                     timeKey.includes(searchValue)
-
                 );
-
 
             default:
 
@@ -1687,16 +1444,14 @@ function filterHistoryRecords() {
 
     });
 
+    // Save matching records for export
+    visibleHistoryRecords = filteredRecords;
 
-    // Display matching records
     updateHistoryTable(filteredRecords);
 
-
-    // Display result count
     if (resultCount) {
 
         resultCount.textContent =
-
             `Showing ${filteredRecords.length} of ${historyRecords.length} records.`;
 
     }
@@ -1704,35 +1459,24 @@ function filterHistoryRecords() {
 }
 
 
-/* =====================================
-   HISTORY SEARCH AND FILTER EVENTS
-===================================== */
+// =====================================
+// HISTORY SEARCH AND FILTER EVENTS
+// =====================================
 
 function setupHistoryFilters() {
 
-    const searchInput =
-        document.getElementById("searchHistory");
+    const searchInput = document.getElementById("searchHistory");
 
-    const filterSelect =
-        document.getElementById("historyFilter");
+    const filterSelect = document.getElementById("historyFilter");
 
+    if (!searchInput || !filterSelect) return;
 
-    if (!searchInput || !filterSelect) {
-
-        return;
-
-    }
-
-
-    // Search while typing
     searchInput.addEventListener("input", function () {
 
         filterHistoryRecords();
 
     });
 
-
-    // Filter when dropdown selection changes
     filterSelect.addEventListener("change", function () {
 
         filterHistoryRecords();
@@ -1741,34 +1485,258 @@ function setupHistoryFilters() {
 
     });
 
-
-    // Initial display
     filterHistoryRecords();
 
 }
 
 
-/* =====================================
-   CSV EXPORT
-===================================== */
+// =====================================
+// HISTORY EXPORT: PDF AND EXCEL
+// =====================================
 
-function csvEscape(value) {
+function getHistoryExportRows() {
 
-    return `"${String(value ?? "").replace(/"/g, '""')}"`;
+    return visibleHistoryRecords.map(record => [
+
+        getRecordDate(record),
+
+        getRecordTime(record),
+
+        record.building || "",
+
+        record.street || record.location || "",
+
+        Number(record.pga ?? 0),
+
+        record.status || ""
+
+    ]);
 
 }
 
 
-function exportCSV() {
+// =====================================
+// CLOSE EXPORT MENU
+// =====================================
 
-    if (historyRecords.length === 0) {
+function closeExportMenu() {
 
-        alert("No records available to export.");
+    const menu = document.getElementById("exportOptions");
+
+    const toggle = document.getElementById("exportToggle");
+
+    if (menu) {
+        menu.hidden = true;
+    }
+
+    if (toggle) {
+        toggle.setAttribute("aria-expanded", "false");
+    }
+
+}
+
+
+// =====================================
+// SETUP EXPORT DROPDOWN
+// =====================================
+
+function setupExportMenu() {
+
+    const dropdown = document.getElementById("exportDropdown");
+
+    const toggle = document.getElementById("exportToggle");
+
+    const menu = document.getElementById("exportOptions");
+
+    if (!dropdown || !toggle || !menu) return;
+
+    toggle.addEventListener("click", event => {
+
+        event.stopPropagation();
+
+        const shouldOpen = menu.hidden;
+
+        menu.hidden = !shouldOpen;
+
+        toggle.setAttribute(
+            "aria-expanded",
+            String(shouldOpen)
+        );
+
+    });
+
+    document.addEventListener("click", event => {
+
+        if (!dropdown.contains(event.target)) {
+            closeExportMenu();
+        }
+
+    });
+
+    document.addEventListener("keydown", event => {
+
+        if (event.key === "Escape") {
+            closeExportMenu();
+        }
+
+    });
+
+}
+
+
+// =====================================
+// EXPORT PDF
+// =====================================
+
+function exportHistoryPDF() {
+
+    closeExportMenu();
+
+    const rows = getHistoryExportRows();
+
+    if (rows.length === 0) {
+
+        alert("There are no matching seismic history records to export.");
 
         return;
 
     }
 
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+
+        alert(
+            "The PDF export library could not be loaded. Check your internet connection and reload the page."
+        );
+
+        return;
+
+    }
+
+    const { jsPDF } = window.jspdf;
+
+    const report = new jsPDF({
+        orientation: "landscape"
+    });
+
+    report.setFontSize(16);
+
+    report.text(
+        "SEVA - Seismic Activity History",
+        14,
+        16
+    );
+
+    report.setFontSize(9);
+
+    report.text(
+        `Generated: ${new Date().toLocaleString()}`,
+        14,
+        23
+    );
+
+    report.text(
+        `Records: ${rows.length}`,
+        14,
+        28
+    );
+
+    if (typeof report.autoTable !== "function") {
+
+        alert(
+            "The PDF table plugin could not be loaded. Check your internet connection and reload the page."
+        );
+
+        return;
+
+    }
+
+    report.autoTable({
+
+        startY: 34,
+
+        head: [[
+            "Date",
+            "Time",
+            "Building",
+            "Street / Location",
+            "PGA (m/s²)",
+            "Status"
+        ]],
+
+        body: rows,
+
+        theme: "grid",
+
+        styles: {
+
+            font: "helvetica",
+
+            fontSize: 8,
+
+            cellPadding: 3,
+
+            overflow: "linebreak"
+
+        },
+
+        headStyles: {
+
+            fillColor: [128, 0, 0],
+
+            textColor: [255, 255, 255],
+
+            fontStyle: "bold"
+
+        },
+
+        alternateRowStyles: {
+
+            fillColor: [248, 244, 244]
+
+        },
+
+        margin: {
+
+            left: 14,
+
+            right: 14
+
+        }
+
+    });
+
+    report.save("SEVA_Seismic_History.pdf");
+
+}
+
+
+// =====================================
+// EXPORT EXCEL
+// =====================================
+
+function exportHistoryExcel() {
+
+    closeExportMenu();
+
+    const rows = getHistoryExportRows();
+
+    if (rows.length === 0) {
+
+        alert("There are no matching seismic history records to export.");
+
+        return;
+
+    }
+
+    if (typeof XLSX === "undefined") {
+
+        alert(
+            "The Excel export library could not be loaded. Check your internet connection and reload the page."
+        );
+
+        return;
+
+    }
 
     const headers = [
 
@@ -1780,442 +1748,74 @@ function exportCSV() {
 
         "Street / Location",
 
-        "PGA",
+        "PGA (m/s²)",
 
         "Status"
 
     ];
 
-
-    const rows = historyRecords.map(record => [
-
-        getRecordDate(record),
-
-        getRecordTime(record),
-
-        record.building,
-
-        record.street || record.location || "",
-
-        record.pga,
-
-        record.status
-
-    ]);
-
-
-    const csvContent = [
+    const worksheet = XLSX.utils.aoa_to_sheet([
 
         headers,
 
         ...rows
 
-    ]
+    ]);
 
-    .map(row =>
+    worksheet["!cols"] = [
 
-        row.map(value => csvEscape(value)).join(",")
+        { wch: 14 },
 
-    )
+        { wch: 14 },
 
-    .join("\r\n");
+        { wch: 22 },
 
+        { wch: 28 },
 
-    const blob = new Blob(
+        { wch: 15 },
 
-        ["\uFEFF" + csvContent],
-
-        {
-
-            type: "text/csv;charset=utf-8;"
-
-        }
-
-    );
-
-
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-
-
-    link.href = url;
-
-    link.download = "SEVA_Seismic_History.csv";
-
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    link.remove();
-
-
-    URL.revokeObjectURL(url);
-
-}
-
-
-/* =====================================
-   CSV IMPORT PARSER
-===================================== */
-
-function parseCSVLine(line) {
-
-    const values = [];
-
-    let current = "";
-
-    let insideQuotes = false;
-
-
-    for (let i = 0; i < line.length; i++) {
-
-        const character = line[i];
-
-
-        if (character === '"') {
-
-            if (insideQuotes && line[i + 1] === '"') {
-
-                current += '"';
-
-                i++;
-
-            } else {
-
-                insideQuotes = !insideQuotes;
-
-            }
-
-        }
-
-        else if (character === "," && !insideQuotes) {
-
-            values.push(current);
-
-            current = "";
-
-        }
-
-        else {
-
-            current += character;
-
-        }
-
-    }
-
-
-    values.push(current);
-
-    return values;
-
-}
-
-
-/* =====================================
-   PREPARE IMPORTED HISTORY RECORD
-===================================== */
-
-function createImportedRecord(values) {
-
-    let dateText;
-
-    let timeText;
-
-    let building;
-
-    let street;
-
-    let pga;
-
-    let status;
-
-
-    // New CSV format:
-    // Date, Time, Building, Street, PGA, Status
-
-    if (values.length >= 6) {
-
-        dateText = values[0].trim();
-
-        timeText = values[1].trim();
-
-        building = values[2].trim();
-
-        street = values[3].trim();
-
-        pga = values[4].trim();
-
-        status = values[5].trim();
-
-    }
-
-
-    // Previous CSV format:
-    // Date and Time, Building, PGA, Location, Status
-
-    else if (values.length >= 5) {
-
-        const dateTime = values[0].trim();
-
-        building = values[1].trim();
-
-        pga = values[2].trim();
-
-        street = values[3].trim();
-
-        status = values[4].trim();
-
-
-        const parsedDate = new Date(dateTime);
-
-
-        if (!Number.isNaN(parsedDate.getTime())) {
-
-            dateText = parsedDate.toLocaleDateString();
-
-            timeText = parsedDate.toLocaleTimeString();
-
-        } else {
-
-            dateText = dateTime;
-
-            timeText = "";
-
-        }
-
-    }
-
-    else {
-
-        return null;
-
-    }
-
-
-    const numericPGA = Number(pga);
-
-
-    const validStatuses = [
-
-        "Normal",
-
-        "Elevated",
-
-        "Breached",
-
-        "Offline"
+        { wch: 16 }
 
     ];
 
+    const workbook = XLSX.utils.book_new();
 
-    if (
+    XLSX.utils.book_append_sheet(
 
-        building === "" ||
+        workbook,
 
-        !Number.isFinite(numericPGA) ||
+        worksheet,
 
-        !validStatuses.includes(status)
-
-    ) {
-
-        return null;
-
-    }
-
-
-    // Try to reconstruct timestamp
-    const parsedTimestamp = new Date(
-
-        `${dateText} ${timeText}`
+        "Seismic History"
 
     );
 
+    XLSX.writeFile(
 
-    return {
+        workbook,
 
-        timestamp: Number.isNaN(parsedTimestamp.getTime())
+        "SEVA_Seismic_History.xlsx"
 
-            ? null
-
-            : parsedTimestamp.getTime(),
-
-        dateText: dateText,
-
-        timeText: timeText,
-
-        building: building,
-
-        street: street,
-
-        pga: numericPGA.toFixed(3),
-
-        status: status
-
-    };
+    );
 
 }
 
 
-/* =====================================
-   CSV IMPORT
-===================================== */
-
-function setupCSVImport() {
-
-    const importInput =
-        document.getElementById("importCSV");
-
-
-    if (!importInput) {
-
-        return;
-
-    }
-
-
-    importInput.addEventListener("change", function (event) {
-
-        const file = event.target.files[0];
-
-
-        if (!file) {
-
-            return;
-
-        }
-
-
-        const reader = new FileReader();
-
-
-        reader.onload = function (loadEvent) {
-
-            try {
-
-                const lines = String(loadEvent.target.result)
-
-                    .replace(/^\uFEFF/, "")
-
-                    .split(/\r?\n/)
-
-                    .filter(line => line.trim() !== "");
-
-
-                if (lines.length < 2) {
-
-                    alert("The CSV file contains no records.");
-
-                    return;
-
-                }
-
-
-                let importedCount = 0;
-
-
-                // Skip the header row
-                lines.slice(1).forEach(line => {
-
-                    const values = parseCSVLine(line);
-
-                    const record = createImportedRecord(values);
-
-
-                    if (!record) {
-
-                        return;
-
-                    }
-
-
-                    historyRecords.unshift(record);
-
-                    importedCount++;
-
-                });
-
-
-                // Keep maximum 500 records
-                if (historyRecords.length > 500) {
-
-                    historyRecords = historyRecords.slice(0, 500);
-
-                }
-
-
-                // Update dashboard and history
-                updateOverview();
-
-                filterHistoryRecords();
-
-
-                alert(
-
-                    `${importedCount} record(s) successfully imported.`
-
-                );
-
-
-            }
-
-            catch (error) {
-
-                console.error("CSV import error:", error);
-
-                alert(
-
-                    "Unable to import CSV. Please check the file format."
-
-                );
-
-            }
-
-            finally {
-
-                event.target.value = "";
-
-            }
-
-        };
-
-
-        reader.onerror = function () {
-
-            alert("Unable to read the selected file.");
-
-            event.target.value = "";
-
-        };
-
-
-        reader.readAsText(file);
-
-    });
-
-}
-
-
-/* =====================================
-   DEMONSTRATION SENSOR DATA
-
-   Generates simulated PGA readings.
-
-   NOT actual ADXL355 readings.
-===================================== */
+// =====================================
+// DEMONSTRATION SENSOR DATA
+//
+// Generates simulated PGA readings.
+// NOT actual ADXL355 readings.
+// =====================================
 
 function simulateSensorData() {
 
     buildings.forEach(building => {
 
-
         // Simulated PGA from 0.00 to 2.40 m/s²
         building.pga = Math.random() * 2.4;
 
-
-                // Determine building status
+        // Determine building status
         building.status = determineStatus(
 
             building.pga,
@@ -2224,16 +1824,13 @@ function simulateSensorData() {
 
         );
 
-
-        // Record the capture time          <-- add these two lines
+        // Record capture time
         building.lastCapture = Date.now();
-
 
         // Add historical record
         addHistory(building);
 
     });
-
 
     // Limit history to 500 records
     if (historyRecords.length > 500) {
@@ -2242,18 +1839,14 @@ function simulateSensorData() {
 
     }
 
-
-    // Update building table on both pages
+    // Update building tables
     updateBuildingTable();
 
-
-    // Update GPS map on both pages
+    // Update GPS maps
     updateMapMarkers();
-
 
     // Update summary cards
     updateOverview();
-
 
     // Get highest PGA
     const highestPGA = Math.max(
@@ -2262,69 +1855,60 @@ function simulateSensorData() {
 
     );
 
-
-    // Update sensor readings on both pages
+    // Update sensor readings
     updateSensorReadings(highestPGA);
 
-
-    // Update activity graphs on both pages
+    // Update PGA waveform source value
     updateChart(highestPGA);
 
-
-    // Refresh history filtering and table
+    // Refresh history table and filters
     filterHistoryRecords();
 
 }
 
 
-/* =====================================
-   INITIALIZE APPLICATION
-===================================== */
+// =====================================
+// INITIALIZE APPLICATION
+// =====================================
 
 document.addEventListener("DOMContentLoaded", function () {
-
 
     // Sidebar navigation
     setupNavigation();
 
-
     // Sidebar hamburger toggle
     setupMenuToggle();
-
 
     // History filter and search
     setupHistoryFilters();
 
+    // Export format menu
+    setupExportMenu();
 
-    // CSV import
-    setupCSVImport();
+    // Building search + dropdown
+    setupBuildingFilters();
 
-    // Building search + dropdown 
-    setupBuildingFilters();  
-
-    // Initialize Chart.js for Dashboard and Activity Monitoring
+    // Initialize dashboard charts
     initializeChart("seismicChart");
 
     initializeChart("activityChart");
 
-
-    // Initialize Leaflet maps for Dashboard and Activity Monitoring
+    // Initialize maps
     initializeMap("map");
 
     initializeMap("activityMap");
 
-
     // Initial building table
     updateBuildingTable();
-
 
     // Initial summary cards
     updateOverview();
 
-
     // Initial simulated sensor readings
     simulateSensorData();
 
+    // Start continuously scrolling PGA waveform
+    startPGAWaveform();
 
     // Update demonstration readings every 10 seconds
     setInterval(simulateSensorData, 10000);
@@ -2332,10 +1916,12 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-/* =====================================
-   HTML BUTTON ACCESS
-===================================== */
+// =====================================
+// HTML BUTTON ACCESS
+// =====================================
 
 window.showPage = showPage;
 
-window.exportCSV = exportCSV;
+window.exportHistoryPDF = exportHistoryPDF;
+
+window.exportHistoryExcel = exportHistoryExcel;
